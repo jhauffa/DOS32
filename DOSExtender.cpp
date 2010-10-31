@@ -7,9 +7,6 @@
 #include "DOSExtender.h"
 
 
-typedef int (*EntryPoint)(void);
-
-
 DEFINE_INSTANCE( DOSExtender );
 
 
@@ -31,12 +28,12 @@ DOSExtender::DOSExtender( const DOS &dosServices ) :
 void DOSExtender::run( Image *img )
 {
 	mImage = img;
-	EntryPoint p = (EntryPoint) img->getEntryPoint();
+	void *entry = img->getEntryPoint();
 	void *stack = img->getStackPointer();
-	TRACE( "running (%p) ...\n\n", p );	
+	TRACE( "running (%p) ...\n\n", entry );	
 	asm volatile ( "mov %%eax, %%es\n\t" \
 	               "mov %1, %%esp\n\t" \
-	               "jmp *%2\n\t" : : "a" (mPspSel), "r" (stack), "m" (p) );
+	               "jmp *%2\n\t" : : "a" (mPspSel), "r" (stack), "m" (entry) );
 }
 
 bool DOSExtender::int21Handler( uint8_t idx, Context &ctx )
