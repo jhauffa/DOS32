@@ -29,13 +29,13 @@
 
 #define PAGE_TYPE_NORMAL	0
 
-#define FIXUP_SOURCE_BYTE			0x0
-#define FIXUP_SOURCE_16BIT_SEGMENT	0x2
-#define FIXUP_SOURCE_16BIT_POINTER	0x3
-#define FIXUP_SOURCE_16BIT_OFFSET	0x5
-#define FIXUP_SOURCE_32BIT_FARPTR   0x6
-#define FIXUP_SOURCE_32BIT_OFFSET	0x7
-#define FIXUP_SOURCE_32BIT_REL		0x8
+#define FIXUP_SOURCE_BYTE			0x0		// low byte
+#define FIXUP_SOURCE_16BIT_SEGMENT	0x2		// 16 bit segment / selector
+#define FIXUP_SOURCE_16BIT_POINTER	0x3		// 32 bit segment:offset pair
+#define FIXUP_SOURCE_16BIT_OFFSET	0x5		// 16 bit offset
+#define FIXUP_SOURCE_32BIT_FARPTR	0x6		// 48 bit selector:offset pair
+#define FIXUP_SOURCE_32BIT_OFFSET	0x7		// 32 bit offset
+#define FIXUP_SOURCE_32BIT_REL		0x8		// 32 bit offset ???
 #define FIXUP_SOURCE_TYPE_MASK		0x0F
 #define FIXUP_SOURCE_FLAGS_ALIAS	0x10
 #define FIXUP_SOURCE_FLAGS_LIST		0x20

@@ -1,5 +1,7 @@
 
 #include "os/OS.h"
+#include "ExecutionEnvironment.h"
+#include "DescriptorTable.h"
 #include "ImageLoaderException.h"
 #include "Debug.h"
 #include "LeImage.h"
@@ -24,14 +26,13 @@ LeImage::LeImage( const std::string &fileName, uint32_t maxHeapSize ) :
 	Image( fileName, maxHeapSize ), mFile( NULL ), mEntryPoint( NULL ),
 	mStackPointer( NULL ), mHeapEnd( NULL )
 {
-        // TODO: move into higher-level code; use DescriptorTable::getOsCodeSel?
-	asm( "mov %%cs, %%ax\n\t" : "=a" (mCodeSel) );
+	ExecutionEnvironment &env = ExecutionEnvironment::getInstance();
+	const DescriptorTable &descTable = env.getDescriptorTable();
+	mCodeSel = descTable.getOsCodeSel();
 }
 
 LeImage::~LeImage()
 {
-	// TODO: add special "empty" state to MemMap to make null pointers
-	//   unneccesary?
 	for ( std::vector<MemMap *>::iterator it = mObjectMappings.begin();
 		  it != mObjectMappings.end(); ++it )
 		delete *it;
@@ -41,8 +42,7 @@ LeImage::~LeImage()
 void LeImage::load()
 {
 	TRACE( "LeImage: loading \"%s\"\n", mFileName.c_str() );
-	MemMap *mem;
-	// TODO: try-block around whole code, delete mem in finally-block
+	MemMap *mem = NULL;
 	try
 	{
 		mFile = OS::createFile( mFileName, File::ACC_READ );
@@ -50,6 +50,7 @@ void LeImage::load()
 	}
 	catch ( const OsException &ex )
 	{
+		delete mem;
 		throw ImageLoaderException( ex );
 	}
 
@@ -99,6 +100,7 @@ void LeImage::load()
 	}
 	catch ( const OsException &ex )
 	{
+		delete mem;
 		throw ImageLoaderException( ex );
 	}
 
