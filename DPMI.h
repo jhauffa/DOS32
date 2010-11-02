@@ -5,7 +5,7 @@
 #include <map>
 #include <stdint.h>
 
-#include "Singleton.h"
+#include "InterruptHandler.h"
 
 
 struct DpmiMemoryInfo
@@ -25,12 +25,15 @@ struct DpmiMemoryInfo
 
 class Context;
 class MemMap;
+class ExecutionEnvironment;
 
-class DPMI : public Singleton<DPMI>
+class DPMI : public InterruptHandler
 {
 	public:
-		DPMI();
+		DPMI( ExecutionEnvironment *env );
 		~DPMI();
+
+		virtual bool handleInterrupt( uint8_t idx, Context &ctx );
 
 	private:
 		enum Error {
@@ -39,12 +42,11 @@ class DPMI : public Singleton<DPMI>
 			ERR_INVALID_SELECTOR = 0x8022
 		};
 
+		ExecutionEnvironment *mEnv;
 		std::map<uint32_t, MemMap *> mMemoryBlocks;
 		uint32_t mAllocatedMemory;
 
 		uint32_t allocateMemory( uint32_t size );
-
-		static bool int31Handler( uint8_t idx, Context &ctx );
 };
 
 

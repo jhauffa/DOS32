@@ -7,21 +7,17 @@
 #include "DOSExtender.h"
 
 
-DEFINE_INSTANCE( DOSExtender );
-
-
-DOSExtender::DOSExtender( const DOS &dosServices ) :
-	Singleton<DOSExtender>( this )
+DOSExtender::DOSExtender( ExecutionEnvironment *env, DOS *dosServices ) :
+	mEnv( env ), mDOS( dosServices )
 {
-	ExecutionEnvironment &env = ExecutionEnvironment::getInstance();
-	env.registerInterruptHandler( 0x21, int21Handler );
+	mEnv->registerInterruptHandler( 0x21, this );
 
 	uint16_t envSel;
-	DescriptorTable &descTable = env.getDescriptorTable();
-	PSP *psp = dosServices.getPsp();
+	DescriptorTable &descTable = mEnv->getDescriptorTable();
+	PSP *psp = mDOS->getPsp();
 	descTable.allocLdtDesc( (uint32_t) psp, 0x100, mPspSel );
-	descTable.allocLdtDesc( (uint32_t) dosServices.getEnvironment(),
-		dosServices.getEnvironmentSize(), envSel );
+	descTable.allocLdtDesc( (uint32_t) mDOS->getEnvironment(), mDOS->getEnvironmentSize(),
+		envSel );
 	psp->environmentSegment = envSel;
 }
 
@@ -36,11 +32,12 @@ void DOSExtender::run( Image *img )
 	               "jmp *%2\n\t" : : "a" (mPspSel), "r" (stack), "m" (entry) );
 }
 
-bool DOSExtender::int21Handler( uint8_t idx, Context &ctx )
+bool DOSExtender::handleInterrupt( uint8_t idx, Context &ctx )
 {
 	/* Most DOS extenders hook INT 0x21 to override a number of functions, particularly
 	   memory management functions and functions that take memory addresses as parameters.
 	   All other function calls are reflected to the real mode interrupt handler. */
+	assert( idx == 0x21 );
 
 	bool canResume = true;
 
@@ -59,18 +56,17 @@ bool DOSExtender::int21Handler( uint8_t idx, Context &ctx )
 			   the data section, which most extenders will use as heap by resizing the
 			   data segment. If the new limit is inside the reserved area, return success.
 			 */
-			// TODO: Linux has mremap and MEMREMAP_MAYMOVE
+			// TODO: Linux has mremap and MREMAP_MAYMOVE, not available on Darwin/BSD
 
 			uint16_t sel = ctx.getES();
 			uint32_t newLimit = ctx.getEBX() * 16;
 			TRACE( "resize segment 0x%02x, new limit = 0x%x\n", sel, newLimit );
 
-			ExecutionEnvironment &env = ExecutionEnvironment::getInstance();
-			DescriptorTable &descTable = env.getDescriptorTable();
+			DescriptorTable &descTable = mEnv->getDescriptorTable();
 			Descriptor *desc = descTable.getDesc( sel, true );
 			if ( desc && ( desc->getSel() == descTable.getOsDataSel() ) )
 			{
-				if ( newLimit > (uint32_t) getInstance().mImage->getHeapEnd() )
+				if ( newLimit > (uint32_t) mImage->getHeapEnd() )
 				{
 					TRACE( "heap space exhausted!\n" );
 					ctx.setCF( true );
@@ -91,7 +87,7 @@ bool DOSExtender::int21Handler( uint8_t idx, Context &ctx )
 			canResume = handleDOS4GW( ctx );
 			break;
 		default:
-			canResume = DOS::int21Handler( idx, ctx );
+			canResume = mDOS->handleInterrupt( idx, ctx );
 	}
 
 	return canResume;

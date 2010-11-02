@@ -5,20 +5,33 @@
 #include "os/ExceptionInfo.h"
 #include "Debug.h"
 #include "Registers.h"
+#include "DOS.h"
 #include "DOSExtender.h"
+#include "DPMI.h"
+#include "InterruptHandler.h"
 #include "ExecutionEnvironment.h"
 
 
 DEFINE_INSTANCE( ExecutionEnvironment );
 
 
-ExecutionEnvironment::ExecutionEnvironment() :
+ExecutionEnvironment::ExecutionEnvironment( int argc, char *argv[], char *envp[] ) :
 	Singleton<ExecutionEnvironment>( this )
 {
+	mDOS = new DOS( argc, argv, envp );
+	mDOSExtender = new DOSExtender( this, mDOS );
+	mDPMI = new DPMI( this );
+}
+
+ExecutionEnvironment::~ExecutionEnvironment()
+{
+	delete mDPMI;
+	delete mDOSExtender;
+	delete mDOS;
 }
 
 void ExecutionEnvironment::registerInterruptHandler( uint8_t idx,
-	InterruptHandler handler )
+	InterruptHandler *handler )
 {
 	mInterruptHandlers[idx] = handler;
 }
@@ -44,8 +57,8 @@ int ExecutionEnvironment::appThreadProc( void *data )
 	mgr.setConsoleInterruptHandler( consoleInterruptHandler );
 
 	// run application
-	DOSExtender::getInstance().run( (Image *) data );
-	return 0;  // never happens
+	getInstance().mDOSExtender->run( (Image *) data );
+	return 0;  // should not happen
 }
 
 void ExecutionEnvironment::memoryExceptionHandler( ExceptionInfo &info )
@@ -74,14 +87,14 @@ void ExecutionEnvironment::memoryExceptionHandler( ExceptionInfo &info )
 		case 0xCD:
 		{
 			// interrupt
-			InterruptHandler hdl = getInstance().mInterruptHandlers[eip[1]];
+			InterruptHandler *hdl = getInstance().mInterruptHandlers[eip[1]];
 			if ( !hdl )
 			{
 				TRACE( "TODO: interrupt 0x%02x, AX = 0x%04x\n", eip[1], ctx.getAX() );
 				canResume = false;
 			}
 			else
-				canResume = hdl( eip[1], ctx );
+				canResume = hdl->handleInterrupt( eip[1], ctx );
 			instrSize += 2;
 			break;
 		}

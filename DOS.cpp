@@ -2,15 +2,10 @@
 #include <string.h>
 
 #include "Debug.h"
-#include "ExecutionEnvironment.h"
 #include "DOS.h"
 
 
-DEFINE_INSTANCE( DOS );
-
-
-DOS::DOS( int argc, char *argv[], char *envp[] ) :
-	Singleton<DOS>( this )
+DOS::DOS( int argc, char *argv[], char *envp[] )
 {
 	// create standard file handles
 	mOpenFiles.reserve( 20 );
@@ -33,7 +28,6 @@ DOS::~DOS()
 	delete mPsp;
 	delete mTime;
 
-	// TODO: empty file state to eschew need for pointers?
 	for ( std::vector<File *>::iterator it = mOpenFiles.begin(); it != mOpenFiles.end();
 	      ++it )
 		delete *it;
@@ -102,9 +96,10 @@ void DOS::initEnvironment( char *envp[], const char *appName )
 	strcpy( &mEnvironment[unixEnvSize + 2], appName );
 }
 
-bool DOS::int21Handler( uint8_t idx, Context &ctx )
+bool DOS::handleInterrupt( uint8_t idx, Context &ctx )
 {
-	// called from DOSExtender::int21Handler
+	// called from DOSExtender::handleInterrupt
+	assert( idx == 0x21 );
 
 	bool canResume = true;
 
@@ -120,18 +115,16 @@ bool DOS::int21Handler( uint8_t idx, Context &ctx )
 		case 0x2C:
 		{
 			TRACE( "get system time\n" );
-			Time *time = getInstance().mTime;
-			time->update();
-			ctx.setCH( time->getHours() );
-			ctx.setCL( time->getMinutes() );
-			ctx.setDH( time->getSeconds() );
-			ctx.setDL( time->getMilliSeconds() * 10 );
+			mTime->update();
+			ctx.setCH( mTime->getHours() );
+			ctx.setCL( mTime->getMinutes() );
+			ctx.setDH( mTime->getSeconds() );
+			ctx.setDL( mTime->getMilliSeconds() * 10 );
 			break;
 		}
 		case 0x2D:
 		{
 			TRACE( "set system time\n" );
-			Time *time = getInstance().mTime;
 			uint8_t hours = ctx.getCH();
 			uint8_t minutes = ctx.getCL();
 			uint8_t seconds = ctx.getDH();
@@ -139,7 +132,7 @@ bool DOS::int21Handler( uint8_t idx, Context &ctx )
 			if ( ( hours < 24 ) && ( minutes < 60 ) && ( seconds < 60 ) &&
 			     ( centiSeconds < 100 ) )
 			{
-				time->setBase( hours, minutes, seconds );
+				mTime->setBase( hours, minutes, seconds );
 				ctx.setAL( 0 );
 			}
 			else

@@ -13,13 +13,9 @@
 #define DPMI_MAX_PAGES   ( DPMI_MAX_MEMORY >> 12 )
 
 
-DEFINE_INSTANCE( DPMI );
-
-
-DPMI::DPMI() :
-	Singleton<DPMI>( this ), mAllocatedMemory( 0 )
+DPMI::DPMI( ExecutionEnvironment *env ) : mEnv( env ), mAllocatedMemory( 0 )
 {
-	ExecutionEnvironment::getInstance().registerInterruptHandler( 0x31, int31Handler );
+	mEnv->registerInterruptHandler( 0x31, this );
 }
 
 DPMI::~DPMI()
@@ -48,8 +44,10 @@ uint32_t DPMI::allocateMemory( uint32_t size )
 	return addr;
 }
 
-bool DPMI::int31Handler( uint8_t idx, Context &ctx )
+bool DPMI::handleInterrupt( uint8_t idx, Context &ctx )
 {
+	assert( idx == 0x31 );
+
 	bool canResume = true;
 
 	uint16_t functionIdx = ctx.getAX();
@@ -62,8 +60,7 @@ bool DPMI::int31Handler( uint8_t idx, Context &ctx )
 		{
 			uint16_t sel = ctx.getBX();
 			TRACE( "get selector base, selector 0x%04x\n", sel );
-			Descriptor *desc = ExecutionEnvironment::getInstance().
-				getDescriptorTable().getDesc( sel, true );
+			Descriptor *desc = mEnv->getDescriptorTable().getDesc( sel, true );
 			if ( desc )
 			{
 				uint32_t base = desc->getBase();
@@ -81,8 +78,7 @@ bool DPMI::int31Handler( uint8_t idx, Context &ctx )
 		case 0x0500:
 		{
 			TRACE( "get free memory information\n" );
-			Descriptor *desc = ExecutionEnvironment::getInstance().
-				getDescriptorTable().getDesc( ctx.getES(), true );
+			Descriptor *desc = mEnv->getDescriptorTable().getDesc( ctx.getES(), true );
 			if ( !desc )
 				break;
 
@@ -93,7 +89,7 @@ bool DPMI::int31Handler( uint8_t idx, Context &ctx )
 			   memory, we just report the maximum amount of memory as available.
 			 */
 			// TODO: Darwin has RLIMIT_RSS, RLIMIT_MEMLOCK, CTL_HW/HW_MEMSIZE/HW_USERMEM
-			uint32_t memUsed = getInstance().mAllocatedMemory;
+			uint32_t memUsed = mAllocatedMemory;
 			DpmiMemoryInfo *info = (DpmiMemoryInfo *) ( desc->getBase() + ctx.getEDI() );
 			memset( info, 0xFF, sizeof( DpmiMemoryInfo ) );
 			info->largestFreeBlockSize = DPMI_MAX_MEMORY - memUsed;
@@ -115,7 +111,7 @@ bool DPMI::int31Handler( uint8_t idx, Context &ctx )
 				break;
 			}
 
-			uint32_t addr = getInstance().allocateMemory( size );
+			uint32_t addr = allocateMemory( size );
 			if ( addr == 0 )
 			{
 				ctx.setAX( ERR_NO_PHYS_MEM );

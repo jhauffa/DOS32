@@ -6,7 +6,7 @@
 #include <vector>
 
 #include "os/OS.h"
-#include "Singleton.h"
+#include "InterruptHandler.h"
 
 
 struct PSP
@@ -33,17 +33,17 @@ struct PSP
 } __attribute__ ((packed));
 
 
-class DOS : public Singleton<DOS>
+class DOS : public InterruptHandler
 {
 	public:
 		DOS( int argc, char *argv[], char *envp[] );
 		~DOS();
 
+		virtual bool handleInterrupt( uint8_t idx, Context &ctx );
+
 		PSP *getPsp() const;
 		char *getEnvironment() const;
 		uint32_t getEnvironmentSize() const;
-
-		static bool int21Handler( uint8_t idx, Context &ctx );
 
 	private:
 		PSP *mPsp;

@@ -5,25 +5,29 @@
 #include <stdint.h>
 
 #include "os/Context.h"
-#include "Singleton.h"
+#include "InterruptHandler.h"
 
 
 class DOS;
 class Image;
+class ExecutionEnvironment;
 
-class DOSExtender : public Singleton<DOSExtender>
+class DOSExtender : public InterruptHandler
 {
 	public:
-		DOSExtender( const DOS &dosServices );
+		DOSExtender( ExecutionEnvironment *env, DOS *dosServices );
 
 		void run( Image *img );
 
+		virtual bool handleInterrupt( uint8_t idx, Context &ctx );
+
 	private:
+		ExecutionEnvironment *mEnv;
+		DOS *mDOS;
 		Image *mImage;
 		uint16_t mPspSel;
 
-		static bool int21Handler( uint8_t idx, Context &ctx );
-		static bool handleDOS4GW( Context &ctx );
+		bool handleDOS4GW( Context &ctx );
 };
 
 
