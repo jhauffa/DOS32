@@ -119,7 +119,7 @@ bool DOS::handleInterrupt( uint8_t idx, Context &ctx )
 			ctx.setCH( mTime->getHours() );
 			ctx.setCL( mTime->getMinutes() );
 			ctx.setDH( mTime->getSeconds() );
-			ctx.setDL( mTime->getMilliSeconds() * 10 );
+			ctx.setDL( mTime->getMilliSeconds() / 10 );
 			break;
 		}
 		case 0x2D:
@@ -132,7 +132,8 @@ bool DOS::handleInterrupt( uint8_t idx, Context &ctx )
 			if ( ( hours < 24 ) && ( minutes < 60 ) && ( seconds < 60 ) &&
 			     ( centiSeconds < 100 ) )
 			{
-				mTime->setBase( hours, minutes, seconds );
+				mTime->update();
+				mTime->setBase( hours, minutes, seconds, centiSeconds * 10 );
 				ctx.setAL( 0 );
 			}
 			else

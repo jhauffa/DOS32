@@ -5,12 +5,7 @@
 #include "os/unix/UnixDateTime.h"
 
 
-UnixTime::UnixTime() : mOffset( 0 )
-{
-	update();
-}
-
-UnixTime::~UnixTime()
+UnixTime::UnixTime() : mOffsetSeconds( 0 ), mOffsetMilliSeconds( 0 )
 {
 }
 
@@ -19,19 +14,28 @@ void UnixTime::update()
 	struct timeval rawTime;
 	if ( gettimeofday( &rawTime, NULL ) == -1 )
 		throw UnixException();
-	rawTime.tv_sec += mOffset;
+	rawTime.tv_sec += mOffsetSeconds;
+
+	mMilliSeconds = ( rawTime.tv_usec / 10000 ) + mOffsetMilliSeconds;
+	int carrySeconds = mMilliSeconds / 1000;
+	if ( carrySeconds != 0 )
+	{
+		rawTime.tv_sec += carrySeconds;
+		mMilliSeconds %= 1000;
+	}
+
 	mCurrentTime = localtime( &rawTime.tv_sec );
-	mMilliSeconds = rawTime.tv_usec / 10000;
 }
 
-void UnixTime::setBase( unsigned int hours, unsigned int minutes, unsigned int seconds )
+void UnixTime::setBase( unsigned int hours, unsigned int minutes, unsigned int seconds,
+	unsigned int milliSeconds )
 {
-	// TODO: move into generic sytem clock class?
 	struct tm baseTime;
 	baseTime.tm_hour = hours;
 	baseTime.tm_min = minutes;
 	baseTime.tm_sec = seconds;
-	mOffset = mktime( &baseTime ) - time( NULL );
+	mOffsetSeconds = mktime( &baseTime ) - mktime( mCurrentTime );
+	mOffsetMilliSeconds = milliSeconds - mMilliSeconds;
 }
 
 unsigned int UnixTime::getHours() const

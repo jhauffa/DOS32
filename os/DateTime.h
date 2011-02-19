@@ -10,7 +10,7 @@ class Time
 
 		virtual void update() = 0;
 		virtual void setBase( unsigned int hours, unsigned int minutes,
-			unsigned int seconds ) = 0;
+			unsigned int seconds, unsigned int milliSeconds ) = 0;
 
 		virtual unsigned int getHours() const = 0;
 		virtual unsigned int getMinutes() const = 0;

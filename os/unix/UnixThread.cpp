@@ -10,10 +10,6 @@ UnixThread::UnixThread( ThreadProc p, void *data ) : mProc( p ), mData( data )
 {
 }
 
-UnixThread::~UnixThread()
-{
-}
-
 void UnixThread::run()
 {
 	int error = pthread_create( &mHandle, NULL, (PthreadProc) mProc, mData );

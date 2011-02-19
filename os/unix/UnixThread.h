@@ -11,7 +11,7 @@ class UnixThread : public Thread
 {
 	public:
 		UnixThread( ThreadProc p, void *data );
-		virtual ~UnixThread();
+		virtual ~UnixThread() {}
 
 		virtual void run();
 		virtual int join();
