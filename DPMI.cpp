@@ -88,7 +88,6 @@ bool DPMI::handleInterrupt( uint8_t idx, Context &ctx )
 			   provide a reliable method of determining the amount of unused physical
 			   memory, we just report the maximum amount of memory as available.
 			 */
-			// TODO: Darwin has RLIMIT_RSS, RLIMIT_MEMLOCK, CTL_HW/HW_MEMSIZE/HW_USERMEM
 			uint32_t memUsed = mAllocatedMemory;
 			DpmiMemoryInfo *info = (DpmiMemoryInfo *) ( desc->getBase() + ctx.getEDI() );
 			memset( info, 0xFF, sizeof( DpmiMemoryInfo ) );
@@ -126,7 +125,7 @@ bool DPMI::handleInterrupt( uint8_t idx, Context &ctx )
 			break;
 		}
 		default:
-			TRACE( "not implemented\n" );
+			FIXME( "not implemented\n" );
 			canResume = false;
 	}
 

@@ -1,8 +1,8 @@
 
 #include <sys/time.h>
 
-#include "UnixException.h"
-#include "UnixDateTime.h"
+#include "os/unix/UnixException.h"
+#include "os/unix/UnixDateTime.h"
 
 
 UnixTime::UnixTime() : mOffset( 0 )

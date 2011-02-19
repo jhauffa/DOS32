@@ -56,8 +56,6 @@ bool DOSExtender::handleInterrupt( uint8_t idx, Context &ctx )
 			   the data section, which most extenders will use as heap by resizing the
 			   data segment. If the new limit is inside the reserved area, return success.
 			 */
-			// TODO: Linux has mremap and MREMAP_MAYMOVE, not available on Darwin/BSD
-
 			uint16_t sel = ctx.getES();
 			uint32_t newLimit = ctx.getEBX() * 16;
 			TRACE( "resize segment 0x%02x, new limit = 0x%x\n", sel, newLimit );
@@ -68,7 +66,7 @@ bool DOSExtender::handleInterrupt( uint8_t idx, Context &ctx )
 			{
 				if ( newLimit > (uint32_t) mImage->getHeapEnd() )
 				{
-					TRACE( "heap space exhausted!\n" );
+					ERR( "heap space exhausted!\n" );
 					ctx.setCF( true );
 				}
 			}
@@ -105,11 +103,11 @@ bool DOSExtender::handleDOS4GW( Context &ctx )
 			ctx.setEAX( 0x4734FFFF );  // high word == "4G"
 			break;
 		case 0x01 ... 0x17:
-			TRACE( "not implemented\n" );
+			FIXME( "not implemented\n" );
 			ctx.setCF( true );
 			break;
 		default:
-			TRACE( "invalid\n" );
+			ERR( "invalid function call\n" );
 			ctx.setCF( true );
 	}
 

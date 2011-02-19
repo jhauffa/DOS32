@@ -3,7 +3,8 @@
 #define __DOS32_OS_UNIX_THREAD_H__
 
 #include <pthread.h>
-#include "../Thread.h"
+
+#include "os/Thread.h"
 
 
 class UnixThread : public Thread

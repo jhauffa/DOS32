@@ -1,19 +1,21 @@
 
-#include "../OS.h"
-#include "../../Debug.h"
-#include "UnixMemMap.h"
-#include "UnixException.h"
-#include "DarwinExceptionInfo.h"
-#include "DarwinExceptionManager.h"
+#include "Debug.h"
+#include "os/OS.h"
+#include "os/unix/UnixMemMap.h"
+#include "os/unix/UnixException.h"
+#include "os/unix/DarwinExceptionInfo.h"
+#include "os/unix/DarwinExceptionManager.h"
 
 #define CANARY  0xCAF00F00
 
 
-DarwinExceptionManager *DarwinExceptionManager::mInstance = NULL;
+DEFINE_INSTANCE( DarwinExceptionManager );
+
 uint32_t DarwinExceptionManager::mReenterCount = 0;
 
 
 DarwinExceptionManager::DarwinExceptionManager() :
+	Singleton<DarwinExceptionManager>( this ),
 	mMemoryExceptionHandler( NULL ), mConsoleInterruptHandler( NULL )
 {
 	// allocate signal stack
@@ -58,20 +60,13 @@ void DarwinExceptionManager::setConsoleInterruptHandler( ExceptionHandler handle
 	mConsoleInterruptHandler = handler;
 }
 
-DarwinExceptionManager &DarwinExceptionManager::getInstance()
-{
-	if ( !mInstance )
-		mInstance = new DarwinExceptionManager();
-	return *mInstance;
-}
-
 void DarwinExceptionManager::signalHandler( int sig, siginfo_t *info, void *data )
 {
 	DarwinExceptionInfo exc( sig, info, data );
 
 	if ( ++mReenterCount > 1 )
 	{
-		TRACE( "\n\nbad memory access in emulator code\n" );
+		ERR( "\n\nbad memory access in emulator code\n" );
 		exc.dump();
 		exit( 3 );
 	}
@@ -95,13 +90,13 @@ void DarwinExceptionManager::signalHandler( int sig, siginfo_t *info, void *data
 		handler( exc );
 		if ( *inst.mStackBottom != CANARY )
 		{
-			TRACE( "signal stack overrun\n" );
+			ERR( "signal stack overrun\n" );
 			exit( 3 );
 		}
 	}
 	else
 	{
-		TRACE( "unexpected signal %d\n", sig );
+		ERR( "unexpected signal %d\n", sig );
 		exit( 3 );
 	}
 	mReenterCount--;

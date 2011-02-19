@@ -210,7 +210,7 @@ bool DOS::handleInterrupt( uint8_t idx, Context &ctx )
 			OS::exitThread( ctx.getAL() );
 			break;
 		default:
-			TRACE( "not implemented\n" );
+			FIXME( "not implemented\n" );
 			canResume = false;
 	}
 

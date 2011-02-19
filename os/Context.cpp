@@ -1,9 +1,9 @@
 
 #include <stdio.h>
 
-#include "../Debug.h"
-#include "../Registers.h"
-#include "Context.h"
+#include "Debug.h"
+#include "Registers.h"
+#include "os/Context.h"
 
 
 uint32_t Context::getReg32( int idx )

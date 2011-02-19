@@ -43,11 +43,9 @@ DescriptorTable &ExecutionEnvironment::getDescriptorTable()
 
 int ExecutionEnvironment::run( Image *img )
 {
-	Thread *thr = OS::createThread( appThreadProc, img );
-	thr->run();
-	int result = thr->join();
-	delete thr;
-	return result;
+	Thread &thr = *OS::createThread( appThreadProc, img );
+	thr.run();
+	return thr.join();
 }
 
 int ExecutionEnvironment::appThreadProc( void *data )
@@ -90,7 +88,7 @@ void ExecutionEnvironment::memoryExceptionHandler( ExceptionInfo &info )
 			InterruptHandler *hdl = getInstance().mInterruptHandlers[eip[1]];
 			if ( !hdl )
 			{
-				TRACE( "TODO: interrupt 0x%02x, AX = 0x%04x\n", eip[1], ctx.getAX() );
+				FIXME( "interrupt 0x%02x, AX = 0x%04x\n", eip[1], ctx.getAX() );
 				canResume = false;
 			}
 			else
@@ -99,11 +97,11 @@ void ExecutionEnvironment::memoryExceptionHandler( ExceptionInfo &info )
 			break;
 		}
 		case 0xFA:
-			TRACE( "clear interrupt flag\n" );
+			FIXME( "clear interrupt flag\n" );
 			instrSize += 1;
 			break;
 		case 0xFB:
-			TRACE( "set interrupt flag\n" );
+			FIXME( "set interrupt flag\n" );
 			instrSize += 1;
 			break;
 		default:
@@ -170,7 +168,7 @@ bool ExecutionEnvironment::loadSelectorAlias( Context &ctx, int segmentReg,
 		return true;
 	}
 
-	TRACE( "trying to load invalid selector 0x%02x\n", selector );
+	ERR( "trying to load invalid selector 0x%02x\n", selector );
 	return false;
 }
 
@@ -230,7 +228,7 @@ int ExecutionEnvironment::decodeModRm( uint8_t *data, Context &ctx, bool addrSiz
 	int &regOp1, int &regOp2, uint32_t &memOp, bool &hasMemOp )
 {
 	if ( addrSizeOverride )
-		TRACE( "TODO: address size override\n" );
+		FIXME( "address size override\n" );
 
 	int instrSize = 1;
 	bool hasSib = false;  // SIB: 0-2 base, 3-5 index, 6-7 scale

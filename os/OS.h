@@ -4,13 +4,13 @@
 
 #include <string>
 
-#include "File.h"
-#include "MemMap.h"
-#include "Thread.h"
-#include "Context.h"
-#include "ExceptionManager.h"
-#include "Ldt.h"
-#include "DateTime.h"
+#include "os/File.h"
+#include "os/MemMap.h"
+#include "os/Thread.h"
+#include "os/Context.h"
+#include "os/ExceptionManager.h"
+#include "os/Ldt.h"
+#include "os/DateTime.h"
 
 
 class OS
@@ -31,10 +31,9 @@ class OS
 
 		static ExceptionManager &getExceptionManager();
 
-		static Ldt &getLdt();
+		static Ldt *createLdt();
 
 		static Time *createTime();
-		// static Date *createDate();
 };
 
 #endif  // __DOS32_OS_OS_H__

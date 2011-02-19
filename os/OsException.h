@@ -3,7 +3,7 @@
 #define __DOS32_OS_EXCEPTION_H__
 
 #include <string>
-#include "../Exception.h"
+#include "Exception.h"
 
 
 class OsException : public Exception

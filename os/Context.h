@@ -108,4 +108,4 @@ class Context
 };
 
 
-#endif  // __DOS32_OS_CONTEXT_H__
+#endif  // __DOS32_CONTEXT_H__

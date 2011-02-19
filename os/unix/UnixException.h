@@ -2,7 +2,7 @@
 #ifndef __DOS32_OS_UNIX_EXCEPTION_H__
 #define __DOS32_OS_UNIX_EXCEPTION_H__
 
-#include "../OsException.h"
+#include "os/OsException.h"
 
 
 class UnixException : public OsException

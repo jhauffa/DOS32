@@ -1,14 +1,17 @@
 
 #include <unistd.h>
 
-#include "UnixFile.h"
-#include "UnixMemMap.h"
-#include "UnixThread.h"
-#include "DarwinContext.h"
-#include "DarwinExceptionManager.h"
-#include "DarwinLdt.h"
-#include "UnixDateTime.h"
-#include "../OS.h"
+#include "os/unix/UnixFile.h"
+#include "os/unix/UnixMemMap.h"
+#include "os/unix/UnixThread.h"
+#include "os/unix/DarwinContext.h"
+#include "os/unix/DarwinExceptionManager.h"
+#include "os/unix/DarwinLdt.h"
+#include "os/unix/UnixDateTime.h"
+#include "os/OS.h"
+
+
+DarwinExceptionManager exceptMgr;
 
 
 File *OS::createFile( const std::string &fileName, int access )
@@ -61,9 +64,9 @@ ExceptionManager &OS::getExceptionManager()
 	return DarwinExceptionManager::getInstance();
 }
 
-Ldt &OS::getLdt()
+Ldt *OS::createLdt()
 {
-	return DarwinLdt::getInstance();
+	return new DarwinLdt();
 }
 
 Time *OS::createTime()

@@ -2,23 +2,9 @@
 #include <architecture/i386/table.h>
 #include <i386/user_ldt.h>
 
-#include "UnixException.h"
-#include "DarwinLdt.h"
+#include "os/unix/UnixException.h"
+#include "os/unix/DarwinLdt.h"
 
-
-DarwinLdt *DarwinLdt::mInstance = NULL;
-
-
-DarwinLdt::~DarwinLdt()
-{
-}
-
-DarwinLdt &DarwinLdt::getInstance()
-{
-	if ( !mInstance )
-		mInstance = new DarwinLdt();
-	return *mInstance;
-}
 
 uint16_t DarwinLdt::allocDesc( uint32_t base, uint32_t limit )
 {

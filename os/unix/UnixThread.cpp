@@ -1,6 +1,6 @@
 
-#include "UnixException.h"
-#include "UnixThread.h"
+#include "os/unix/UnixException.h"
+#include "os/unix/UnixThread.h"
 
 
 typedef void *(*PthreadProc)(void *);

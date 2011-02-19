@@ -5,29 +5,27 @@
 
 
 Descriptor::Descriptor( uint16_t sel ) :
-	mType( DESC_TYPE_OS ), mBase( 0 ), mLimit( 0xFFFFFFFF ), mSel( sel ), mAliasSel( 0 )
+	mType( DESC_TYPE_OS ), mBase( 0 ), mLimit( 0xFFFFFFFF ), mSel( sel ), mAliasSel( 0 ),
+	mLdt( NULL )
 {
 }
 
-Descriptor::Descriptor( uint32_t base, uint32_t limit ) :
-	mType( DESC_TYPE_LDT ), mBase( base ), mLimit( limit ), mAliasSel( 0 )
+Descriptor::Descriptor( Ldt *ldt, uint32_t base, uint32_t limit ) :
+	mType( DESC_TYPE_LDT ), mBase( base ), mLimit( limit ), mAliasSel( 0 ), mLdt( ldt )
 {
-	Ldt &ldt = OS::getLdt();
-	mSel = ldt.allocDesc( base, limit );
+	mSel = mLdt->allocDesc( base, limit );
 }
 
 Descriptor::Descriptor( uint16_t sel, uint16_t aliasSel ) :
-	mType( DESC_TYPE_ALIAS ), mBase( 0 ), mLimit( 0 ), mSel( sel ), mAliasSel( aliasSel )
+	mType( DESC_TYPE_ALIAS ), mBase( 0 ), mLimit( 0 ), mSel( sel ), mAliasSel( aliasSel ),
+	mLdt( NULL )
 {
 }
 
 Descriptor::~Descriptor()
 {
-	if ( mType == DESC_TYPE_LDT )
-	{
-		Ldt &ldt = OS::getLdt();
-		ldt.freeDesc( mSel );
-	}
+	if ( mLdt )
+		mLdt->freeDesc( mSel );
 }
 
 DescriptorType Descriptor::getType() const
@@ -59,8 +57,7 @@ bool Descriptor::setLimit( uint32_t limit )
 {
 	if ( mType == DESC_TYPE_LDT )
 	{
-		Ldt &ldt = OS::getLdt();
-		ldt.setLimit( mSel, limit );
+		mLdt->setLimit( mSel, limit );
 		return true;
 	}
 	return false;
@@ -79,6 +76,8 @@ bool Descriptor::setAliasSel( uint16_t aliasSel )
 
 DescriptorTable::DescriptorTable()
 {
+	mLdt = OS::createLdt();
+
 	// get selectors provided by OS
 	uint16_t sel;
 	asm ( "mov %%cs, %%ax\n\t" : "=a" (sel) );
@@ -102,6 +101,7 @@ DescriptorTable::~DescriptorTable()
 	for ( std::map<uint16_t, Descriptor *>::const_iterator it = mDesc.begin();
 	      it != mDesc.end(); ++it )
 		delete it->second;
+	delete mLdt;
 }
 
 Descriptor *DescriptorTable::getDesc( uint16_t sel, bool resolveAlias )
@@ -124,7 +124,7 @@ void DescriptorTable::allocOsDesc( uint16_t sel )
 
 void DescriptorTable::allocLdtDesc( uint32_t base, uint32_t limit, uint16_t &sel )
 {
-	Descriptor *desc = new Descriptor( base, limit );
+	Descriptor *desc = new Descriptor( mLdt, base, limit );
 	sel = desc->getSel();
 	if ( !setDesc( sel, desc ) )
 		delete desc;
@@ -151,7 +151,7 @@ bool DescriptorTable::setDesc( uint16_t sel, Descriptor *desc )
 	if ( getDesc( sel, false ) != NULL )
 	{
 		if ( desc->getType() != DESC_TYPE_OS )
-			TRACE( "WARNING: selector 0x%02x already exists\n", sel );
+			ERR( "selector 0x%02x already exists\n", sel );
 		return false;
 	}
 

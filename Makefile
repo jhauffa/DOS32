@@ -13,8 +13,8 @@ all : $(OBJDIR) dos32
 
 .PHONY: clean
 clean :
-	rm -r $(OBJDIR)
-	rm dos32
+	-rm -r $(OBJDIR)
+	-rm dos32
 
 $(OBJDIR) :
 	mkdir $(OBJDIR)
@@ -25,4 +25,4 @@ dos32 : $(GEN_DOS32) $(HEADERS_DOS32)
 	$(CXX) -m32 -o $@ $(GEN_DOS32)
 
 $(OBJDIR)/%.o : %.cpp
-	$(CXX) $(CXXFLAGS) -m32 -c -o $@ $<
+	$(CXX) $(CXXFLAGS) -I. -m32 -c -o $@ $<

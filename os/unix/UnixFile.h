@@ -3,7 +3,8 @@
 #define __DOS32_OS_UNIX_FILE_H__
 
 #include <string>
-#include "../File.h"
+
+#include "os/File.h"
 
 
 class UnixFile : public File

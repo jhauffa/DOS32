@@ -42,7 +42,7 @@ LeImage::~LeImage()
 void LeImage::load()
 {
 	TRACE( "LeImage: loading \"%s\"\n", mFileName.c_str() );
-	MemMap *mem = NULL;
+	MemMap *mem;
 	try
 	{
 		mFile = OS::createFile( mFileName, File::ACC_READ );
@@ -60,7 +60,7 @@ void LeImage::load()
 	verifyHeader( header );
 
 	// locate object table, page table, fixup table and fixup record table
-	// TODO: move into helper function
+	// TODO: move into helper function, merge try-catch-blocks
 	uint8_t *headerPtr = (uint8_t *) header;
 	const LePageTableEntry *pageTable = NULL;
 	if ( header->pageTableOffset != 0 )
@@ -89,7 +89,6 @@ void LeImage::load()
 	// load objects into memory
 	try
 	{
-	        // TODO: iterate over numObjects-1, handle stack separately
 		for (int i = 0; i < header->numObjects; i++)
 		{
 			bool isStack = ( i == ( header->espObjectIdx - 1 ) );
@@ -111,7 +110,6 @@ void LeImage::load()
 		(void *) ( (uint8_t *) mObjectMappings[header->espObjectIdx - 1]->getPtr() +
 			header->esp );
 	mHeapEnd = (uint8_t *) mStackPointer + mMaxHeapSize;
-
 	delete mem;
 }
 
@@ -148,7 +146,7 @@ LeHeader *LeImage::findLeHeader( const MemMap &mem ) const
 				return header;
 			}
 			else
-				TRACE( "found invalid LE header\n" );
+				ERR( "found invalid LE header\n" );
 		}
 		ptr++;
 	}
@@ -197,7 +195,7 @@ void LeImage::mapObject( const MemMap &mem, const LeHeader *header,
 
 	if (  ( object->flags & OBJECT_FLAGS_EXEC ) &&
 	     !( object->flags & OBJECT_FLAGS_32BIT ) )
-		TRACE( "WARNING: 16-bit code object\n" );
+		FIXME( "16-bit code object\n" );
 
 	if ( !mem.isInRange( (void *) &pageTable[object->pageTableIdx +
 			object->numPageTableEntries] ) )
@@ -283,17 +281,17 @@ int LeImage::processRelocationRecord( int objectIdx, uint32_t objectOffset,
 {
 	if ( reloc->sourceType & FIXUP_SOURCE_FLAGS_LIST )
 	{
-		TRACE( "relocation source list\n" );
+		FIXME( "relocation source list\n" );
 		throw ImageLoaderException( ImageLoaderException::IMG_NOT_SUPPORTED );
 	}
 	if ( ( reloc->targetType & FIXUP_TARGET_TYPE_MASK ) != FIXUP_TARGET_INTERNAL )
 	{
-		TRACE( "unknown relocation type, target 0x%x\n", reloc->targetType );
+		FIXME( "unknown relocation type, target 0x%x\n", reloc->targetType );
 		throw ImageLoaderException( ImageLoaderException::IMG_NOT_SUPPORTED );
 	}
 	if ( ( reloc->targetType & FIXUP_TARGET_FLAGS_ADD ) != 0 )
 	{
-		TRACE( "additive relocation\n" );
+		FIXME( "additive relocation\n" );
 		throw ImageLoaderException( ImageLoaderException::IMG_NOT_SUPPORTED );
 	}
 
@@ -301,7 +299,7 @@ int LeImage::processRelocationRecord( int objectIdx, uint32_t objectOffset,
 	uint8_t *sourcePtr = (uint8_t *) mObjectMappings[objectIdx]->getPtr() +	objectOffset +
 		pageOffset;
 	uint8_t targetObjectIdx = reloc->data[2];
-//	TRACE( "relocation at %p: target object %u, ", sourcePtr, targetObjectIdx );
+	TRACE( "relocation at %p: target object %u, ", sourcePtr, targetObjectIdx );
 	uint32_t targetOffset = (uint32_t) mObjectMappings[targetObjectIdx - 1]->getPtr();
 	// record size = source/target type (2 bytes) + page offset (2 bytes) + target object
 	//                 index (1-based, 1 byte) + target offset (see below)
@@ -316,18 +314,18 @@ int LeImage::processRelocationRecord( int objectIdx, uint32_t objectOffset,
 		targetOffset += *( (uint16_t *) &reloc->data[3] );
 		recordSize += 2;
 	}
-//	TRACE( "target offset = 0x%x\n", targetOffset );
+	TRACE( "target offset = 0x%x\n", targetOffset );
 
 	switch ( reloc->sourceType & FIXUP_SOURCE_TYPE_MASK )
 	{
 		case FIXUP_SOURCE_BYTE:
-			TRACE( "TODO: byte relocation at %p, ignoring\n", sourcePtr );
+			FIXME( "byte relocation at %p, ignoring\n", sourcePtr );
 			break;
 		case FIXUP_SOURCE_16BIT_SEGMENT:
-			TRACE( "TODO: 16-bit segment relocation at %p, ignoring\n", sourcePtr );
+			FIXME( "16-bit segment relocation at %p, ignoring\n", sourcePtr );
 			break;
 		case FIXUP_SOURCE_16BIT_POINTER:
-			TRACE( "TODO: 16-bit pointer relocation at %p, ignoring\n", sourcePtr );
+			FIXME( "16-bit pointer relocation at %p, ignoring\n", sourcePtr );
 			break;
 		case FIXUP_SOURCE_16BIT_OFFSET:
 			*( (uint16_t *) sourcePtr ) = targetOffset & 0xFFFF;
@@ -340,10 +338,10 @@ int LeImage::processRelocationRecord( int objectIdx, uint32_t objectOffset,
 			*( (uint32_t *) sourcePtr ) = targetOffset;
 			break;
 		case FIXUP_SOURCE_32BIT_REL:
-			TRACE( "TODO: 32-bit relative relocation at %p, ignoring\n", sourcePtr );
+			FIXME( "32-bit relative relocation at %p, ignoring\n", sourcePtr );
 			break;
 		default:
-			TRACE( "unknown relocation type, source 0x%x\n", reloc->sourceType );
+			ERR( "unknown relocation type, source 0x%x\n", reloc->sourceType );
 			throw ImageLoaderException( ImageLoaderException::IMG_NOT_SUPPORTED );
 	}
 

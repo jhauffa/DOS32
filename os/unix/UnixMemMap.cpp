@@ -2,9 +2,9 @@
 #include <sys/mman.h>
 #include <errno.h>
 
-#include "../../Debug.h"
-#include "UnixException.h"
-#include "UnixMemMap.h"
+#include "Debug.h"
+#include "os/unix/UnixException.h"
+#include "os/unix/UnixMemMap.h"
 
 
 UnixMemMap::UnixMemMap( const File &file, int access ) : mPtr( (void *) -1 )

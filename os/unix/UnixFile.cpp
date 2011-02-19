@@ -4,8 +4,8 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-#include "UnixException.h"
-#include "UnixFile.h"
+#include "os/unix/UnixException.h"
+#include "os/unix/UnixFile.h"
 
 
 UnixFile::UnixFile( const std::string &fileName, int access ) : mFd( -1 )

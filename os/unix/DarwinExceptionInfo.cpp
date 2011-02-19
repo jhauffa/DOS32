@@ -1,8 +1,8 @@
 
 #include <stdio.h>
 
-#include "DarwinContext.h"
-#include "DarwinExceptionInfo.h"
+#include "os/unix/DarwinContext.h"
+#include "os/unix/DarwinExceptionInfo.h"
 
 
 DarwinExceptionInfo::DarwinExceptionInfo( int sig, siginfo_t *info, void *data ) :

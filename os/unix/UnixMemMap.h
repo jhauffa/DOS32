@@ -5,8 +5,8 @@
 #include <list>
 #include <sys/types.h>
 
-#include "../File.h"
-#include "../MemMap.h"
+#include "os/File.h"
+#include "os/MemMap.h"
 
 
 class UnixMemMap : public MemMap

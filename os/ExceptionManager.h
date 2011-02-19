@@ -4,7 +4,6 @@
 
 class ExceptionInfo;
 
-
 typedef void (*ExceptionHandler)( ExceptionInfo & );
 
 
