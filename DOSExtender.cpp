@@ -54,8 +54,8 @@ bool DOSExtender::handleInterrupt( uint8_t idx, Context &ctx )
 			   limit might already be in use and most OSes don't provide a way to find
 			   out. The image loader reserves a specified amount of memory at the end of
 			   the data section, which most extenders will use as heap by resizing the
-			   data segment. If the new limit is inside the reserved area, return success.
-			 */
+			   data segment. If the new limit is inside the reserved area, return
+			   success. */
 			uint16_t sel = ctx.getES();
 			uint32_t newLimit = ctx.getEBX() * 16;
 			TRACE( "resize segment 0x%02x, new limit = 0x%x\n", sel, newLimit );

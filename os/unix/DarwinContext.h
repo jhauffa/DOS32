@@ -11,6 +11,7 @@ class DarwinContext : public Context
 {
 	public:
 		DarwinContext( void *ctx );
+		virtual ~DarwinContext() {}
 
 		// AX
 		virtual uint32_t getEAX();

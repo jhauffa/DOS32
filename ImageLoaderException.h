@@ -2,7 +2,7 @@
 #ifndef __DOS32_IMAGE_LOADER_EXCEPTION_H__
 #define __DOS32_IMAGE_LOADER_EXCEPTION_H__
 
-#include "os/OsException.h"
+#include "os/OSException.h"
 #include "Exception.h"
 
 
@@ -48,10 +48,11 @@ class ImageLoaderException : public Exception
 		};
 
 		ImageLoaderException( LoaderError error );
-		ImageLoaderException( const OsException &ex );
+		ImageLoaderException( const OSException &ex );
+		virtual ~ImageLoaderException() {}
 
-		std::string getErrorMessage() const;
-		int getError() const;
+		virtual std::string getErrorMessage() const;
+		virtual int getError() const;
 
 	protected:
 		LoaderError mError;

@@ -8,6 +8,8 @@
 class Context
 {
 	public:
+		virtual ~Context() {}
+
 		// AX
 		virtual uint32_t getEAX() = 0;
 		virtual void setEAX( uint32_t value ) = 0;

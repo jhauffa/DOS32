@@ -2,7 +2,7 @@
 #include <string.h>
 
 #include "os/OS.h"
-#include "os/OsException.h"
+#include "os/OSException.h"
 #include "Debug.h"
 #include "ExecutionEnvironment.h"
 #include "DPMI.h"
@@ -33,7 +33,7 @@ uint32_t DPMI::allocateMemory( uint32_t size )
 		mem = OS::createMemMap( size,
 			MemMap::ACC_READ | MemMap::ACC_WRITE | MemMap::ACC_EXEC );
 	}
-	catch ( const OsException &ex )
+	catch ( const OSException &ex )
 	{
 		return 0;
 	}
@@ -86,8 +86,7 @@ bool DPMI::handleInterrupt( uint8_t idx, Context &ctx )
 			   (256 MB) and all of them can provide a virtually unlimited amount of memory
 			   transparently by swapping to disk. Since most operating systems do not
 			   provide a reliable method of determining the amount of unused physical
-			   memory, we just report the maximum amount of memory as available.
-			 */
+			   memory, we just report the maximum amount of memory as available. */
 			uint32_t memUsed = mAllocatedMemory;
 			DpmiMemoryInfo *info = (DpmiMemoryInfo *) ( desc->getBase() + ctx.getEDI() );
 			memset( info, 0xFF, sizeof( DpmiMemoryInfo ) );

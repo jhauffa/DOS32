@@ -14,11 +14,11 @@
 #  if DEBUG_LEVEL > 1
 #    define TRACE(format, ...)	__MSG__( format, ## __VA_ARGS__ )
 #  else
-#    define TRACE
+#    define TRACE(format, ...)
 #  endif
 #else
-#  define FIXME
-#  define TRACE
+#  define FIXME(format, ...)
+#  define TRACE(format, ...)
 #endif
 
 #endif  // __DOS32_DEBUG_H__

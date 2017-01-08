@@ -113,7 +113,6 @@ bool DOS::handleInterrupt( uint8_t idx, Context &ctx )
 			ctx.setAL( 0x02 );  // drive C
 			break;
 		case 0x2C:
-		{
 			TRACE( "get system time\n" );
 			mTime->update();
 			ctx.setCH( mTime->getHours() );
@@ -121,7 +120,6 @@ bool DOS::handleInterrupt( uint8_t idx, Context &ctx )
 			ctx.setDH( mTime->getSeconds() );
 			ctx.setDL( mTime->getMilliSeconds() / 10 );
 			break;
-		}
 		case 0x2D:
 		{
 			TRACE( "set system time\n" );

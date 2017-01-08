@@ -48,7 +48,7 @@ void LeImage::load()
 		mFile = OS::createFile( mFileName, File::ACC_READ );
 		mem = OS::createMemMap( *mFile, MemMap::ACC_READ | MemMap::ACC_WRITE );
 	}
-	catch ( const OsException &ex )
+	catch ( const OSException &ex )
 	{
 		delete mem;
 		throw ImageLoaderException( ex );
@@ -97,7 +97,7 @@ void LeImage::load()
 
 		relocate( *mem, header, objectTable, fixupTable, fixupRecordTable );
 	}
-	catch ( const OsException &ex )
+	catch ( const OSException &ex )
 	{
 		delete mem;
 		throw ImageLoaderException( ex );

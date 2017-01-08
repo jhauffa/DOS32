@@ -1,6 +1,7 @@
 OBJDIR = objs
 OBJS_DOS32 = ImageFactory.o ImageLoaderException.o LeImage.o ExecutionEnvironment.o \
-	DOS.o DOSExtender.o DPMI.o DescriptorTable.o Launcher.o os/Context.o \
+	DOS.o DOSExtender.o DPMI.o DescriptorTable.o Launcher.o \
+	os/Context.o \
 	os/unix/UnixFile.o os/unix/UnixMemMap.o os/unix/UnixException.o os/unix/UnixThread.o \
 	os/unix/DarwinContext.o os/unix/DarwinExceptionManager.o \
 	os/unix/DarwinExceptionInfo.o os/unix/DarwinLdt.o os/unix/UnixDateTime.o os/unix/OS.o
