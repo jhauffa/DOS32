@@ -114,4 +114,7 @@ void Context::dump()
 		getESI(), getEDI(), getESP(), getEBP() );
 	fprintf( stderr, "EIP = 0x%08x  EFLAGS = 0x%08x\n",
 		getEIP(), getEFLAGS() );
+	fprintf( stderr, "CS = 0x%04x  SS = 0x%04x  DS = 0x%04x  ES = 0x%04x\n" \
+		"FS = 0x%04x  GS = 0x%04x\n",
+		getCS(), getSS(), getDS(), getES(), getFS(), getGS() );
 }

@@ -29,7 +29,12 @@ class DarwinExceptionManager : public ExceptionManager,
 		ExceptionHandler mConsoleInterruptHandler;
 
 		static uint32_t mReenterCount;
+		static uint16_t mOSCodeSel, mOSDataSel, mOSThreadSel;
+		static UnixMemMap *mRestoreSegRegsCode;
 
+		static void emitLoadAX( uint8_t *&buf, uint16_t value );
+		static void emitLoadSegReg( uint8_t *&buf, uint8_t segCode );
+		static void emitFarJump( uint8_t *&buf, uint16_t sel, uint32_t addr );
 		static void signalHandler( int sig, siginfo_t *info, void *data );
 };
 
