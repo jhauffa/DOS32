@@ -1,6 +1,7 @@
 
 #include <architecture/i386/table.h>
 #include <i386/user_ldt.h>
+#include <string.h>
 
 #include "os/unix/UnixException.h"
 #include "os/unix/DarwinLdt.h"
@@ -9,6 +10,8 @@
 uint16_t DarwinLdt::allocDesc( uint32_t base, uint32_t limit )
 {
 	data_desc_t desc;
+	// anonymous members have to be 0!
+	memset( &desc, 0, sizeof(data_desc_t) );
 	setDescLimit( &desc, limit );
 	desc.base00 = base & 0xFFFF;
 	desc.base16 = ( base >> 16 ) & 0xFF;
@@ -19,9 +22,9 @@ uint16_t DarwinLdt::allocDesc( uint32_t base, uint32_t limit )
 	desc.stksz = DESC_DATA_32B;
 
 	int sel = i386_set_ldt( LDT_AUTO_ALLOC, (ldt_entry *) &desc, 1 );
-	sel = ( sel << 3 ) | 0x07;
 	if ( sel == -1 )
 		throw UnixException();
+	sel = ( sel << 3 ) | 0x07;
 	return sel;
 }
 
