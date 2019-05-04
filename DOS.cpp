@@ -19,6 +19,7 @@ DOS::DOS( int argc, char *argv[], char *envp[] )
 
 	// TODO: convert path names, filter environment variables
 	initPsp( argc, argv );
+	mDta = ((char *) mPsp) + 0x80;
 	initEnvironment( envp, argv[1] );
 }
 
@@ -111,6 +112,12 @@ bool DOS::handleInterrupt( uint8_t idx, Context &ctx )
 		case 0x19:
 			TRACE( "get current default drive\n" );
 			ctx.setAL( 0x02 );  // drive C
+			break;
+		case 0x1A:
+			TRACE( "set disk transfer address\n" );
+			// TODO: hack, hooked by DOS extender
+			mDta = (char *) ctx.getEDX();
+			TRACE( "new DTA = %p\n", mDta );
 			break;
 		case 0x2C:
 			TRACE( "get system time\n" );
