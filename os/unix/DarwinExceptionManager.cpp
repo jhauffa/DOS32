@@ -9,7 +9,7 @@
 #define CANARY  0xCAF00F00
 
 
-DEFINE_INSTANCE( DarwinExceptionManager );
+PLACE_INSTANCE( DarwinExceptionManager );
 
 uint32_t DarwinExceptionManager::mReenterCount = 0;
 uint16_t DarwinExceptionManager::mOSCodeSel = 0;

@@ -5,7 +5,8 @@
 #include <assert.h>
 
 
-#define DEFINE_INSTANCE( c )  template<> c *Singleton<c>::mInstance = NULL
+#define DEFINE_INSTANCE( c )  template<> c *Singleton<c>::mInstance
+#define PLACE_INSTANCE( c )  template<> c *Singleton<c>::mInstance = NULL
 
 
 template<class T> class Singleton

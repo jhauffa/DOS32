@@ -52,5 +52,7 @@ class ExecutionEnvironment : public Singleton<ExecutionEnvironment>
 			int &regOp1, int &regOp2, uint32_t &memOp, bool &hasMemOp );
 };
 
+DEFINE_INSTANCE( ExecutionEnvironment );
+
 
 #endif  // __DOS32_EXECUTION_ENVIRONMENT_H__

@@ -2,7 +2,7 @@
 #ifndef __DOS32_DESCRIPTOR_TABLE_H__
 #define __DOS32_DESCRIPTOR_TABLE_H__
 
-#include "os/ldt.h"
+#include "os/Ldt.h"
 
 #include <stdint.h>
 #include <map>

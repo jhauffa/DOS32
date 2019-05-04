@@ -38,5 +38,7 @@ class DarwinExceptionManager : public ExceptionManager,
 		static void signalHandler( int sig, siginfo_t *info, void *data );
 };
 
+DEFINE_INSTANCE( DarwinExceptionManager );
+
 
 #endif  // __DOS32_OS_UNIX_DARWIN_EXCEPTION_MANAGER__

@@ -12,7 +12,7 @@
 #include "ExecutionEnvironment.h"
 
 
-DEFINE_INSTANCE( ExecutionEnvironment );
+PLACE_INSTANCE( ExecutionEnvironment );
 
 
 ExecutionEnvironment::ExecutionEnvironment( int argc, char *argv[], char *envp[] ) :
