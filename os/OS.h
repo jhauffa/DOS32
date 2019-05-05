@@ -4,7 +4,6 @@
 
 #include <string>
 
-#include "os/File.h"
 #include "os/MemMap.h"
 #include "os/Thread.h"
 #include "os/Context.h"
@@ -16,12 +15,7 @@
 class OS
 {
 	public:
-		static File *createFile( const std::string &fileName, int access );
-		static File *createStdInFile();
-		static File *createStdOutFile();
-		static File *createStdErrFile();
-
-		static MemMap *createMemMap( const File &file, int access );
+		static MemMap *createMemMap( const std::string &fileName, int access );
 		static MemMap *createMemMap( MemSize size, int access );
 
 		static Thread *createThread( ThreadProc p, void *data );

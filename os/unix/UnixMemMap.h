@@ -5,18 +5,17 @@
 #include <list>
 #include <sys/types.h>
 
-#include "os/File.h"
 #include "os/MemMap.h"
 
 
 class UnixMemMap : public MemMap
 {
 	public:
-		UnixMemMap( const File &file, int access );
+		UnixMemMap( const std::string &fileName, int access );
 		UnixMemMap( MemSize size, int access );
 		virtual ~UnixMemMap();
 
-		virtual void map( const File &file, MemSize regionOffset, FileSize fileOffset,
+		virtual void map( const MemMap &fileMap, MemSize regionOffset, MemSize fileOffset,
 			MemSize length );
 
 		virtual void *getPtr() const;
@@ -24,6 +23,9 @@ class UnixMemMap : public MemMap
 
 		virtual bool isInRange( void *ptr ) const;
 		virtual bool isInRange( MemSize offset ) const;
+
+	protected:
+		virtual void *getFileHandle() const;
 
 	private:
 		int mFd;

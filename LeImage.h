@@ -138,7 +138,6 @@ class LeImage : public Image
 		virtual void *getHeapEnd() const;
 
 	private:
-		const File *mFile;
 		void *mEntryPoint;
 		void *mStackPointer;
 		void *mHeapEnd;

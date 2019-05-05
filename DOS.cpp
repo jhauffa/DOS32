@@ -7,14 +7,6 @@
 
 DOS::DOS( int argc, char *argv[], char *envp[] )
 {
-	// create standard file handles
-	mOpenFiles.reserve( 20 );
-	mOpenFiles.push_back( OS::createStdInFile() );
-	mOpenFiles.push_back( OS::createStdOutFile() );
-	mOpenFiles.push_back( OS::createStdErrFile() );
-	mOpenFiles.push_back( NULL );  // TODO: STDAUX
-	mOpenFiles.push_back( NULL );  // TODO: STDPRN
-
 	mTime = OS::createTime();
 
 	// TODO: convert path names, filter environment variables
@@ -28,10 +20,6 @@ DOS::~DOS()
 	delete[] mEnvironment;
 	delete mPsp;
 	delete mTime;
-
-	for ( std::vector<File *>::iterator it = mOpenFiles.begin(); it != mOpenFiles.end();
-	      ++it )
-		delete *it;
 }
 
 PSP *DOS::getPsp() const

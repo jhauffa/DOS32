@@ -2,11 +2,7 @@
 #ifndef __DOS32_OS_MEMMAP_H__
 #define __DOS32_OS_MEMMAP_H__
 
-#include <sys/types.h>
-
-#include "os/File.h"
-
-typedef off_t MemSize;
+typedef unsigned long MemSize;
 
 
 class MemMap
@@ -16,7 +12,7 @@ class MemMap
 
 		virtual ~MemMap() {}
 
-		virtual void map( const File &file, MemSize regionOffset, FileSize fileOffset,
+		virtual void map( const MemMap &fileMap, MemSize regionOffset, MemSize fileOffset,
 			MemSize length ) = 0;
 
 		virtual void *getPtr() const = 0;
@@ -24,6 +20,8 @@ class MemMap
 
 		virtual bool isInRange( void *ptr ) const = 0;
 		virtual bool isInRange( MemSize offset ) const = 0;
+
+		virtual void *getFileHandle() const = 0;
 };
 
 

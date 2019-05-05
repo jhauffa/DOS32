@@ -1,7 +1,4 @@
 
-#include <unistd.h>
-
-#include "os/unix/UnixFile.h"
 #include "os/unix/UnixMemMap.h"
 #include "os/unix/UnixThread.h"
 #include "os/unix/DarwinContext.h"
@@ -14,29 +11,9 @@
 DarwinExceptionManager exceptMgr;
 
 
-File *OS::createFile( const std::string &fileName, int access )
+MemMap *OS::createMemMap( const std::string &fileName, int access )
 {
-	return new UnixFile( fileName, access );
-}
-
-File *OS::createStdInFile()
-{
-	return new UnixFile( STDIN_FILENO );
-}
-
-File *OS::createStdOutFile()
-{
-	return new UnixFile( STDOUT_FILENO );
-}
-
-File *OS::createStdErrFile()
-{
-	return new UnixFile( STDERR_FILENO );
-}
-
-MemMap *OS::createMemMap( const File &file, int access )
-{
-	return new UnixMemMap( file, access );
+	return new UnixMemMap( fileName, access );
 }
 
 MemMap *OS::createMemMap( MemSize size, int access )

@@ -50,7 +50,6 @@ class DOS : public InterruptHandler
 		char *mEnvironment;
 		uint32_t mEnvironmentSize;
 		Time *mTime;
-		std::vector<File *> mOpenFiles;
 		char *mDta;
 
 		void initPsp( int argc, char *argv[] );

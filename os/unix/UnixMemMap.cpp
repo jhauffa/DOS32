@@ -1,6 +1,7 @@
 
 #include <sys/mman.h>
 #include <unistd.h>
+#include <fcntl.h>
 #include <errno.h>
 
 #include "Debug.h"
@@ -8,21 +9,29 @@
 #include "os/unix/UnixMemMap.h"
 
 
-UnixMemMap::UnixMemMap( const File &file, int access ) : mPtr( (void *) -1 )
+UnixMemMap::UnixMemMap( const std::string &fileName, int access )
 {
-	mSize = file.getSize();
-	mProtFlags = convertFlags( access );
-	mPtr = mmap( NULL, mSize, mProtFlags, MAP_PRIVATE, file.getHandle(), 0 );
-	if ( mPtr == (void *) -1 )
+	mFd = open( fileName.c_str(), O_RDONLY );
+	if ( mFd < 0 )
 		throw UnixException();
+	mSize = lseek( mFd, 0, SEEK_END );
+
+	mProtFlags = convertFlags( access );
+	mPtr = mmap( NULL, mSize, mProtFlags, MAP_PRIVATE, mFd, 0 );
+	if ( mPtr == MAP_FAILED )
+	{
+		int error = errno;
+		close( mFd );
+		throw UnixException( error );
+	}
 	mEnd = (uint8_t *) mPtr + mSize;
 }
 
-UnixMemMap::UnixMemMap( MemSize size, int access ) : mPtr( (void *) -1 ), mSize( size )
+UnixMemMap::UnixMemMap( MemSize size, int access ) : mSize( size ), mFd( -1 )
 {
 	mProtFlags = convertFlags( access );
 	mPtr = mmap( NULL, mSize, mProtFlags, MAP_ANON | MAP_PRIVATE, 0, 0 );
-	if ( mPtr == (void *) -1 )
+	if ( mPtr == MAP_FAILED )
 		throw UnixException();
 	mEnd = (uint8_t *) mPtr + mSize;
 }
@@ -32,11 +41,12 @@ UnixMemMap::~UnixMemMap()
 	for (std::list<SubMapping>::iterator it = mSubMappings.begin();
 	     it != mSubMappings.end(); ++it)
 		munmap( it->addr, it->length );
-	if ( mPtr != (void *) -1 )
-		munmap( mPtr, mSize );
+	munmap( mPtr, mSize );
+	if ( mFd != -1 )
+		close( mFd );
 }
 
-void UnixMemMap::map( const File &file, MemSize regionOffset, FileSize fileOffset,
+void UnixMemMap::map( const MemMap &fileMap, MemSize regionOffset, MemSize fileOffset,
 	MemSize length )
 {
 	assert ( isInRange( regionOffset ) && isInRange( regionOffset + length - 1 ) );
@@ -46,7 +56,7 @@ void UnixMemMap::map( const File &file, MemSize regionOffset, FileSize fileOffse
 	if ( ( ( (uintptr_t) addr & 0xFFF ) == 0 ) && ( ( fileOffset & 0xFFF ) == 0 ) )
 	{
 		void *ptr = mmap( addr, length, mProtFlags, MAP_FIXED | MAP_PRIVATE,
-			file.getHandle(), fileOffset );
+			(int) fileMap.getFileHandle(), fileOffset );
 		if ( ptr == (void *) -1 )
 			throw UnixException();
 
@@ -58,7 +68,7 @@ void UnixMemMap::map( const File &file, MemSize regionOffset, FileSize fileOffse
 	else
 	{
 		// target address or file offset not page aligned, read directly
-		int fd = dup( file.getHandle() );
+		int fd = dup( (int) fileMap.getFileHandle() );
 		lseek( fd, fileOffset, SEEK_SET );
 		mprotect( addr, length, PROT_READ | PROT_WRITE );
 		ssize_t bytesRead = read( fd, addr, length );
@@ -91,6 +101,11 @@ bool UnixMemMap::isInRange( void *ptr ) const
 bool UnixMemMap::isInRange( MemSize offset ) const
 {
 	return ( offset < mSize );
+}
+
+void *UnixMemMap::getFileHandle() const
+{
+	return (void *) mFd;
 }
 
 int UnixMemMap::convertFlags( int access )
