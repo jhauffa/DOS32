@@ -43,17 +43,17 @@ class DescriptorTable
 
 		Descriptor *getDesc( uint16_t sel );
 
-		void allocOsDesc( uint16_t sel );
+		void allocOSDesc( uint16_t sel );
 		void allocLDTDesc( uint32_t base, uint32_t limit, uint16_t &sel );
 
-		uint16_t getOsCodeSel() const;
-		uint16_t getOsDataSel() const;
+		uint16_t getOSCodeSel() const;
+		uint16_t getOSDataSel() const;
 
 	private:
 		LDT *mLDT;
 		std::map<uint16_t, Descriptor *> mDesc;
-		uint16_t mOsCodeSel;
-		uint16_t mOsDataSel;
+		uint16_t mOSCodeSel;
+		uint16_t mOSDataSel;
 
 		bool setDesc( uint16_t sel, Descriptor *desc );
 };

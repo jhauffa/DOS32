@@ -28,7 +28,7 @@ LEImage::LEImage( const std::string &fileName, uint32_t maxHeapSize ) :
 {
 	ExecutionEnvironment &env = ExecutionEnvironment::getInstance();
 	const DescriptorTable &descTable = env.getDescriptorTable();
-	mCodeSel = descTable.getOsCodeSel();
+	mCodeSel = descTable.getOSCodeSel();
 }
 
 LEImage::~LEImage()

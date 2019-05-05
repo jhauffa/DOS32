@@ -9,7 +9,7 @@ DOS::DOS( int argc, char *argv[], char *envp[] )
 {
 	mTime = OS::createTime();
 
-	// TODO: convert path names, filter environment variables
+	// TODO: convert/filter path names and env. variables (or load everything from cfg.)
 	initPsp( argc, argv );
 	mDta = ((char *) mPsp) + 0x80;
 	initEnvironment( envp, argv[1] );

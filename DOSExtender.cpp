@@ -62,7 +62,7 @@ bool DOSExtender::handleInterrupt( uint8_t idx, Context &ctx )
 
 			DescriptorTable &descTable = mEnv->getDescriptorTable();
 			Descriptor *desc = descTable.getDesc( sel );
-			if ( desc && ( desc->getSel() == descTable.getOsDataSel() ) )
+			if ( desc && ( desc->getSel() == descTable.getOSDataSel() ) )
 			{
 				if ( newLimit > (uint32_t) mImage->getHeapEnd() )
 				{

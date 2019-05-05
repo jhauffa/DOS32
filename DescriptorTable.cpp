@@ -59,19 +59,19 @@ DescriptorTable::DescriptorTable()
 	// get selectors provided by OS
 	uint16_t sel;
 	asm ( "mov %%cs, %%ax\n\t" : "=a" (sel) );
-	mOsCodeSel = sel;
-	allocOsDesc( sel );
+	mOSCodeSel = sel;
+	allocOSDesc( sel );
 	asm ( "mov %%ss, %%ax\n\t" : "=a" (sel) );
-	allocOsDesc( sel );
+	allocOSDesc( sel );
 	asm ( "mov %%ds, %%ax\n\t" : "=a" (sel) );
-	mOsDataSel = sel;
-	allocOsDesc( sel );
+	mOSDataSel = sel;
+	allocOSDesc( sel );
 	asm ( "mov %%es, %%ax\n\t" : "=a" (sel) );
-	allocOsDesc( sel );
+	allocOSDesc( sel );
 	asm ( "mov %%fs, %%ax\n\t" : "=a" (sel) );
-	allocOsDesc( sel );
+	allocOSDesc( sel );
 	asm ( "mov %%gs, %%ax\n\t" : "=a" (sel) );
-	allocOsDesc( sel );
+	allocOSDesc( sel );
 }
 
 DescriptorTable::~DescriptorTable()
@@ -90,7 +90,7 @@ Descriptor *DescriptorTable::getDesc( uint16_t sel )
 	return NULL;
 }
 
-void DescriptorTable::allocOsDesc( uint16_t sel )
+void DescriptorTable::allocOSDesc( uint16_t sel )
 {
 	Descriptor *desc = new Descriptor( sel );
 	if ( !setDesc( sel, desc ) )
@@ -121,12 +121,12 @@ bool DescriptorTable::setDesc( uint16_t sel, Descriptor *desc )
 	return true;
 }
 
-uint16_t DescriptorTable::getOsCodeSel() const
+uint16_t DescriptorTable::getOSCodeSel() const
 {
-	return mOsCodeSel;
+	return mOSCodeSel;
 }
 
-uint16_t DescriptorTable::getOsDataSel() const
+uint16_t DescriptorTable::getOSDataSel() const
 {
-	return mOsDataSel;
+	return mOSDataSel;
 }
