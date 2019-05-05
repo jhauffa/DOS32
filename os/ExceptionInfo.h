@@ -13,7 +13,7 @@ class ExceptionInfo
 		virtual void *getFaultAddr() = 0;
 		virtual Context &getContext() = 0;
 
-		virtual void dump() = 0;
+		virtual void dump();
 };
 
 

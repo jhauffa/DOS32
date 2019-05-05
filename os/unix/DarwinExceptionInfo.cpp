@@ -36,16 +36,7 @@ void DarwinExceptionInfo::dump()
 		mInfo->si_code );
 	fprintf( stderr, "fault address = %p\n", mInfo->si_addr );
 
-	mContext->dump();
-
-	uint8_t *eip = (uint8_t *) mContext->getEIP();
-	if ( eip )
-	{
-		fprintf( stderr, "memory at EIP: " );
-		for ( int i = 0; i < 8; i++ )
-			fprintf( stderr, "%02x ", eip[i] );
-		fprintf( stderr, "\n" );
-	}
+	ExceptionInfo::dump();
 }
 
 void DarwinExceptionInfo::getSignalName( int sig, int code, const char *&sigName,
