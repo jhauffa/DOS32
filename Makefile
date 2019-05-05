@@ -1,10 +1,10 @@
 OBJDIR = objs
-OBJS_DOS32 = ImageFactory.o ImageLoaderException.o LeImage.o ExecutionEnvironment.o \
+OBJS_DOS32 = ImageFactory.o ImageLoaderException.o LEImage.o ExecutionEnvironment.o \
 	DOS.o DOSExtender.o DPMI.o DescriptorTable.o Launcher.o \
 	os/Context.o os/ExceptionInfo.o \
 	os/unix/UnixMemMap.o os/unix/UnixException.o os/unix/UnixThread.o \
 	os/unix/DarwinContext.o os/unix/DarwinExceptionManager.o \
-	os/unix/DarwinExceptionInfo.o os/unix/DarwinLdt.o os/unix/UnixDateTime.o os/unix/OS.o
+	os/unix/DarwinExceptionInfo.o os/unix/DarwinLDT.o os/unix/UnixDateTime.o os/unix/OS.o
 HEADERS_DOS32 = *.h os/*.h os/unix/*.h
 
 GEN_DOS32 := $(addprefix $(OBJDIR)/,$(OBJS_DOS32))

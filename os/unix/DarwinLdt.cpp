@@ -4,10 +4,10 @@
 #include <cstring>
 
 #include "os/unix/UnixException.h"
-#include "os/unix/DarwinLdt.h"
+#include "os/unix/DarwinLDT.h"
 
 
-uint16_t DarwinLdt::allocDesc( uint32_t base, uint32_t limit )
+uint16_t DarwinLDT::allocDesc( uint32_t base, uint32_t limit )
 {
 	data_desc_t desc;
 	// anonymous members have to be 0!
@@ -28,13 +28,13 @@ uint16_t DarwinLdt::allocDesc( uint32_t base, uint32_t limit )
 	return sel;
 }
 
-void DarwinLdt::freeDesc( uint16_t sel )
+void DarwinLDT::freeDesc( uint16_t sel )
 {
 	if ( i386_set_ldt( sel, NULL, 1 ) == -1 )
 		throw UnixException();
 }
 
-void DarwinLdt::setLimit( uint16_t sel, uint32_t limit )
+void DarwinLDT::setLimit( uint16_t sel, uint32_t limit )
 {
 	data_desc_t desc;
 	int selIdx = sel >> 3;
@@ -45,7 +45,7 @@ void DarwinLdt::setLimit( uint16_t sel, uint32_t limit )
 		throw UnixException();	
 }
 
-void DarwinLdt::setDescLimit( void *desc, uint32_t limit )
+void DarwinLDT::setDescLimit( void *desc, uint32_t limit )
 {
 	data_desc_t *d = (data_desc_t *) desc;
 	if ( limit >= 0x100000 )

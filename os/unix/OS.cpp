@@ -3,7 +3,7 @@
 #include "os/unix/UnixThread.h"
 #include "os/unix/DarwinContext.h"
 #include "os/unix/DarwinExceptionManager.h"
-#include "os/unix/DarwinLdt.h"
+#include "os/unix/DarwinLDT.h"
 #include "os/unix/UnixDateTime.h"
 #include "os/OS.h"
 
@@ -41,9 +41,9 @@ ExceptionManager &OS::getExceptionManager()
 	return DarwinExceptionManager::getInstance();
 }
 
-Ldt *OS::createLdt()
+LDT *OS::createLDT()
 {
-	return new DarwinLdt();
+	return new DarwinLDT();
 }
 
 Time *OS::createTime()

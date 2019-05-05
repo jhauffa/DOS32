@@ -15,8 +15,8 @@ DOSExtender::DOSExtender( ExecutionEnvironment *env, DOS *dosServices ) :
 	uint16_t envSel;
 	DescriptorTable &descTable = mEnv->getDescriptorTable();
 	PSP *psp = mDOS->getPsp();
-	descTable.allocLdtDesc( (uint32_t) psp, 0x100, mPspSel );
-	descTable.allocLdtDesc( (uint32_t) mDOS->getEnvironment(), mDOS->getEnvironmentSize(),
+	descTable.allocLDTDesc( (uint32_t) psp, 0x100, mPspSel );
+	descTable.allocLDTDesc( (uint32_t) mDOS->getEnvironment(), mDOS->getEnvironmentSize(),
 		envSel );
 	psp->environmentSegment = envSel;
 }

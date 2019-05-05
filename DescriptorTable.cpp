@@ -6,26 +6,26 @@
 
 Descriptor::Descriptor( uint16_t sel ) :
 	mType( DESC_TYPE_OS ), mBase( 0 ), mLimit( 0xFFFFFFFF ), mSel( sel ), mAliasSel( 0 ),
-	mLdt( NULL )
+	mLDT( NULL )
 {
 }
 
-Descriptor::Descriptor( Ldt *ldt, uint32_t base, uint32_t limit ) :
-	mType( DESC_TYPE_LDT ), mBase( base ), mLimit( limit ), mAliasSel( 0 ), mLdt( ldt )
+Descriptor::Descriptor( LDT *ldt, uint32_t base, uint32_t limit ) :
+	mType( DESC_TYPE_LDT ), mBase( base ), mLimit( limit ), mAliasSel( 0 ), mLDT( ldt )
 {
-	mSel = mLdt->allocDesc( base, limit );
+	mSel = mLDT->allocDesc( base, limit );
 }
 
 Descriptor::Descriptor( uint16_t sel, uint16_t aliasSel ) :
 	mType( DESC_TYPE_ALIAS ), mBase( 0 ), mLimit( 0 ), mSel( sel ), mAliasSel( aliasSel ),
-	mLdt( NULL )
+	mLDT( NULL )
 {
 }
 
 Descriptor::~Descriptor()
 {
-	if ( mLdt )
-		mLdt->freeDesc( mSel );
+	if ( mLDT )
+		mLDT->freeDesc( mSel );
 }
 
 DescriptorType Descriptor::getType() const
@@ -57,7 +57,7 @@ bool Descriptor::setLimit( uint32_t limit )
 {
 	if ( mType == DESC_TYPE_LDT )
 	{
-		mLdt->setLimit( mSel, limit );
+		mLDT->setLimit( mSel, limit );
 		return true;
 	}
 	return false;
@@ -76,7 +76,7 @@ bool Descriptor::setAliasSel( uint16_t aliasSel )
 
 DescriptorTable::DescriptorTable()
 {
-	mLdt = OS::createLdt();
+	mLDT = OS::createLDT();
 
 	// get selectors provided by OS
 	uint16_t sel;
@@ -101,7 +101,7 @@ DescriptorTable::~DescriptorTable()
 	for ( std::map<uint16_t, Descriptor *>::const_iterator it = mDesc.begin();
 	      it != mDesc.end(); ++it )
 		delete it->second;
-	delete mLdt;
+	delete mLDT;
 }
 
 Descriptor *DescriptorTable::getDesc( uint16_t sel, bool resolveAlias )
@@ -122,9 +122,9 @@ void DescriptorTable::allocOsDesc( uint16_t sel )
 		delete desc;
 }
 
-void DescriptorTable::allocLdtDesc( uint32_t base, uint32_t limit, uint16_t &sel )
+void DescriptorTable::allocLDTDesc( uint32_t base, uint32_t limit, uint16_t &sel )
 {
-	Descriptor *desc = new Descriptor( mLdt, base, limit );
+	Descriptor *desc = new Descriptor( mLDT, base, limit );
 	sel = desc->getSel();
 	if ( !setDesc( sel, desc ) )
 		delete desc;

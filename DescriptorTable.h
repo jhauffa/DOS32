@@ -2,7 +2,7 @@
 #ifndef __DOS32_DESCRIPTOR_TABLE_H__
 #define __DOS32_DESCRIPTOR_TABLE_H__
 
-#include "os/Ldt.h"
+#include "os/LDT.h"
 
 #include <cstdint>
 #include <map>
@@ -18,7 +18,7 @@ class Descriptor
 {
 	public:
 		Descriptor( uint16_t sel );  // OS descriptor
-		Descriptor( Ldt *ldt, uint32_t base, uint32_t limit );  // LDT descriptor
+		Descriptor( LDT *ldt, uint32_t base, uint32_t limit );  // LDT descriptor
 		Descriptor( uint16_t sel, uint16_t aliasSel );  // alias descriptor
 		~Descriptor();
 
@@ -37,7 +37,7 @@ class Descriptor
 		uint32_t mLimit;
 		uint16_t mSel;
 		uint16_t mAliasSel;
-		Ldt *mLdt;
+		LDT *mLDT;
 };
 
 class DescriptorTable
@@ -49,14 +49,14 @@ class DescriptorTable
 		Descriptor *getDesc( uint16_t sel, bool resolveAlias );
 
 		void allocOsDesc( uint16_t sel );
-		void allocLdtDesc( uint32_t base, uint32_t limit, uint16_t &sel );
+		void allocLDTDesc( uint32_t base, uint32_t limit, uint16_t &sel );
 		void allocAliasDesc( uint16_t sel, uint16_t aliasSel );
 
 		uint16_t getOsCodeSel() const;
 		uint16_t getOsDataSel() const;
 
 	private:
-		Ldt *mLdt;
+		LDT *mLDT;
 		std::map<uint16_t, Descriptor *> mDesc;
 		uint16_t mOsCodeSel;
 		uint16_t mOsDataSel;

@@ -5,10 +5,10 @@
 #include <cstdint>
 
 
-class Ldt
+class LDT
 {
 	public:
-		virtual ~Ldt() {}
+		virtual ~LDT() {}
 
 		virtual uint16_t allocDesc( uint32_t base, uint32_t limit ) = 0;
 		virtual void freeDesc( uint16_t sel ) = 0;

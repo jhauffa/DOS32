@@ -8,7 +8,7 @@
 #include "os/Thread.h"
 #include "os/Context.h"
 #include "os/ExceptionManager.h"
-#include "os/Ldt.h"
+#include "os/LDT.h"
 #include "os/DateTime.h"
 
 
@@ -25,7 +25,7 @@ class OS
 
 		static ExceptionManager &getExceptionManager();
 
-		static Ldt *createLdt();
+		static LDT *createLDT();
 
 		static Time *createTime();
 };

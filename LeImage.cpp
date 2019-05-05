@@ -4,7 +4,7 @@
 #include "DescriptorTable.h"
 #include "ImageLoaderException.h"
 #include "Debug.h"
-#include "LeImage.h"
+#include "LEImage.h"
 
 
 namespace
@@ -12,17 +12,17 @@ namespace
 
 // register with ImageFactory
 
-static Image *createLeImage( const std::string &fileName, uint32_t maxHeapSize )
+static Image *createLEImage( const std::string &fileName, uint32_t maxHeapSize )
 {
-	return new LeImage( fileName, maxHeapSize );
+	return new LEImage( fileName, maxHeapSize );
 }
 
-static ImageFactory creator( createLeImage );
+static ImageFactory creator( createLEImage );
 
 }
 
 
-LeImage::LeImage( const std::string &fileName, uint32_t maxHeapSize ) :
+LEImage::LEImage( const std::string &fileName, uint32_t maxHeapSize ) :
 	Image( fileName, maxHeapSize ), mEntryPoint( NULL ),
 	mStackPointer( NULL ), mHeapEnd( NULL )
 {
@@ -31,16 +31,16 @@ LeImage::LeImage( const std::string &fileName, uint32_t maxHeapSize ) :
 	mCodeSel = descTable.getOsCodeSel();
 }
 
-LeImage::~LeImage()
+LEImage::~LEImage()
 {
 	for ( std::vector<MemMap *>::iterator it = mObjectMappings.begin();
 		  it != mObjectMappings.end(); ++it )
 		delete *it;
 }
 
-void LeImage::load()
+void LEImage::load()
 {
-	TRACE( "LeImage: loading \"%s\"\n", mFileName.c_str() );
+	TRACE( "LEImage: loading \"%s\"\n", mFileName.c_str() );
 	MemMap *mem;
 	try
 	{
@@ -51,7 +51,7 @@ void LeImage::load()
 		throw ImageLoaderException( ex );
 	}
 
-	LeHeader *header = findLeHeader( *mem );
+	LEHeader *header = findLEHeader( *mem );
 	if ( !header )
 		throw ImageLoaderException( ImageLoaderException::IMG_UNKNOWN_FORMAT );
 	verifyHeader( header );
@@ -59,27 +59,27 @@ void LeImage::load()
 	// locate object table, page table, fixup table and fixup record table
 	// TODO: move into helper function, merge try-catch-blocks
 	uint8_t *headerPtr = (uint8_t *) header;
-	const LePageTableEntry *pageTable = NULL;
+	const LEPageTableEntry *pageTable = NULL;
 	if ( header->pageTableOffset != 0 )
-		pageTable = (LePageTableEntry *) ( headerPtr + header->pageTableOffset );
+		pageTable = (LEPageTableEntry *) ( headerPtr + header->pageTableOffset );
 	if ( !pageTable || !mem->isInRange( (void *) pageTable ) )
 		throw ImageLoaderException( ImageLoaderException::IMG_CORRUPTED );
 
-	const LeObjectTableEntry *objectTable = NULL;
+	const LEObjectTableEntry *objectTable = NULL;
 	if ( ( header->objectTableOffset != 0 ) && ( header->numObjects > 0 ) )
-		objectTable = (LeObjectTableEntry *) ( headerPtr + header->objectTableOffset );
+		objectTable = (LEObjectTableEntry *) ( headerPtr + header->objectTableOffset );
 	if ( !objectTable || !mem->isInRange( (void *) &objectTable[header->numObjects] ) )
 		throw ImageLoaderException( ImageLoaderException::IMG_CORRUPTED );
 
-	const LeFixupTableEntry *fixupTable = NULL;
+	const LEFixupTableEntry *fixupTable = NULL;
 	if ( header->fixupPageTableOffset != 0 )
-		fixupTable = (LeFixupTableEntry *) ( headerPtr + header->fixupPageTableOffset );
+		fixupTable = (LEFixupTableEntry *) ( headerPtr + header->fixupPageTableOffset );
 	if ( !fixupTable || !mem->isInRange( (void *) fixupTable ) )
 		throw ImageLoaderException( ImageLoaderException::IMG_CORRUPTED );
 
-	const LeFixupRecord *fixupRecordTable = NULL;
+	const LEFixupRecord *fixupRecordTable = NULL;
 	if ( header->fixupRecordTableOffset != 0 )
-		fixupRecordTable = (LeFixupRecord *) (headerPtr + header->fixupRecordTableOffset);
+		fixupRecordTable = (LEFixupRecord *) (headerPtr + header->fixupRecordTableOffset);
 	if ( !fixupRecordTable || !mem->isInRange( (void *) fixupRecordTable ) )
 		throw ImageLoaderException( ImageLoaderException::IMG_CORRUPTED );
 
@@ -110,22 +110,22 @@ void LeImage::load()
 	delete mem;
 }
 
-void *LeImage::getEntryPoint() const
+void *LEImage::getEntryPoint() const
 {
 	return mEntryPoint;
 }
 
-void *LeImage::getStackPointer() const
+void *LEImage::getStackPointer() const
 {
 	return mStackPointer;
 }
 
-void *LeImage::getHeapEnd() const
+void *LEImage::getHeapEnd() const
 {
 	return mHeapEnd;
 }
 
-LeHeader *LeImage::findLeHeader( const MemMap &mem ) const
+LEHeader *LEImage::findLEHeader( const MemMap &mem ) const
 {
 	uint16_t *ptr = (uint16_t *) mem.getPtr();
 	while ( mem.isInRange( ptr + ( DOS_EXT_TYPE / 2 ) + 1 ) )
@@ -135,7 +135,7 @@ LeHeader *LeImage::findLeHeader( const MemMap &mem ) const
 			uint32_t headerOffset = *( (uint32_t *) ( (uint8_t *) ptr + DOS_LE_OFFSET ) );
 			TRACE( "LE header offset = 0x%x\n", headerOffset );
 
-			LeHeader *header = (LeHeader *) ( (uint8_t *) ptr + headerOffset );
+			LEHeader *header = (LEHeader *) ( (uint8_t *) ptr + headerOffset );
 			if ( mem.isInRange( (void *) ( header+1 ) ) && ( header->magic == MAGIC_LE ) )
 			{
 				TRACE( "found valid LE header\n" );
@@ -150,7 +150,7 @@ LeHeader *LeImage::findLeHeader( const MemMap &mem ) const
 	return NULL;
 }
 
-void LeImage::verifyHeader( const LeHeader *header ) const
+void LEImage::verifyHeader( const LEHeader *header ) const
 {
 	if ( ( header->byteOrder != 0 ) || ( header->wordOrder != 0 ) )
 		throw ImageLoaderException( ImageLoaderException::IMG_INCOMPATIBLE );
@@ -175,8 +175,8 @@ void LeImage::verifyHeader( const LeHeader *header ) const
 		throw ImageLoaderException( ImageLoaderException::IMG_NOT_SUPPORTED );
 }
 
-void LeImage::mapObject( const MemMap &mem, const LeHeader *header,
-	const LeObjectTableEntry *object, const LePageTableEntry *pageTable, bool isStack )
+void LEImage::mapObject( const MemMap &mem, const LEHeader *header,
+	const LEObjectTableEntry *object, const LEPageTableEntry *pageTable, bool isStack )
 {
 	TRACE( "object base = 0x%x, size = %u, flags = 0x%x\n", object->relocBaseAddr,
 		object->virtualSize, object->flags );
@@ -198,8 +198,8 @@ void LeImage::mapObject( const MemMap &mem, const LeHeader *header,
 			object->numPageTableEntries] ) )
 		throw ImageLoaderException( ImageLoaderException::IMG_CORRUPTED );
 
-	// Allocate a VM area; ignore permission flags so that code can be
-	// patched without having to modify and restore the read-only state.
+	// Allocate a VM area; ignore permission flags so that code can be patched without
+	// having to modify and restore the read-only state.
 	// TODO: evaluate cost/benefit/feasability of correct page protection
 	MemSize allocSize = roundToPageSize( object->virtualSize, header->pageSize );
 	if ( isStack )
@@ -215,7 +215,7 @@ void LeImage::mapObject( const MemMap &mem, const LeHeader *header,
 	uint32_t endOffset = 0;
 	for ( int i = 0; i < object->numPageTableEntries; i++ )
 	{
-		const LePageTableEntry *page = &pageTable[object->pageTableIdx + i - 1];
+		const LEPageTableEntry *page = &pageTable[object->pageTableIdx + i - 1];
 		if ( page->type != PAGE_TYPE_NORMAL )
 			throw ImageLoaderException( ImageLoaderException::IMG_NOT_SUPPORTED );
 
@@ -244,9 +244,9 @@ void LeImage::mapObject( const MemMap &mem, const LeHeader *header,
 	}
 }
 
-void LeImage::relocate( const MemMap &mem, const LeHeader *header,
-	const LeObjectTableEntry *objectTable, const LeFixupTableEntry *fixupTable,
-	const LeFixupRecord *fixupRecordTable )
+void LEImage::relocate( const MemMap &mem, const LEHeader *header,
+	const LEObjectTableEntry *objectTable, const LEFixupTableEntry *fixupTable,
+	const LEFixupRecord *fixupRecordTable )
 {
 	for ( int i = 0; i < header->numObjects; i++ )
 	{
@@ -257,9 +257,9 @@ void LeImage::relocate( const MemMap &mem, const LeHeader *header,
 
 		for ( int j = 0; j < objectTable[i].numPageTableEntries; j++ )
 		{
-			const LeFixupRecord *relocStart = (const LeFixupRecord *)
+			const LEFixupRecord *relocStart = (const LEFixupRecord *)
 				( (uint8_t *) fixupRecordTable + fixupTable[firstPage + j] );
-			const LeFixupRecord *relocEnd =	(const LeFixupRecord *)
+			const LEFixupRecord *relocEnd =	(const LEFixupRecord *)
 				( (uint8_t *) fixupRecordTable + fixupTable[firstPage + j + 1] );
 			if ( !mem.isInRange( (void *) relocEnd ) )
 				throw ImageLoaderException( ImageLoaderException::IMG_CORRUPTED );
@@ -267,14 +267,14 @@ void LeImage::relocate( const MemMap &mem, const LeHeader *header,
 			while ( relocStart < relocEnd )
 			{
 				int size = processRelocationRecord( i, j * header->pageSize, relocStart );
-				relocStart = (const LeFixupRecord *) ( (uint8_t *) relocStart + size );
+				relocStart = (const LEFixupRecord *) ( (uint8_t *) relocStart + size );
 			}
 		}
 	}
 }
 
-int LeImage::processRelocationRecord( int objectIdx, uint32_t objectOffset,
-	const LeFixupRecord *reloc )
+int LEImage::processRelocationRecord( int objectIdx, uint32_t objectOffset,
+	const LEFixupRecord *reloc )
 {
 	if ( reloc->sourceType & FIXUP_SOURCE_FLAGS_LIST )
 	{
@@ -345,7 +345,7 @@ int LeImage::processRelocationRecord( int objectIdx, uint32_t objectOffset,
 	return recordSize;
 }
 
-uint32_t LeImage::roundToPageSize( uint32_t size, uint32_t pageSize )
+uint32_t LEImage::roundToPageSize( uint32_t size, uint32_t pageSize )
 {
 	return ( ( size / pageSize ) + 1 ) * pageSize;
 }

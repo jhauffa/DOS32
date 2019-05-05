@@ -46,7 +46,7 @@
 #define FIXUP_TARGET_FLAGS_32BIT	0x10
 
 
-struct LeHeader
+struct LEHeader
 {
 	uint16_t magic;
 	uint8_t byteOrder;
@@ -96,7 +96,7 @@ struct LeHeader
 	uint32_t heapSize;
 } __attribute__ ((packed));
 
-struct LeObjectTableEntry
+struct LEObjectTableEntry
 {
 	uint32_t virtualSize;
 	uint32_t relocBaseAddr;
@@ -106,16 +106,16 @@ struct LeObjectTableEntry
 	uint32_t reserved;
 } __attribute__ ((packed));
 
-struct LePageTableEntry
+struct LEPageTableEntry
 {
 	uint16_t pageHigh;
 	uint8_t pageLow;
 	uint8_t type;
 } __attribute__ ((packed));
 
-typedef uint32_t LeFixupTableEntry;
+typedef uint32_t LEFixupTableEntry;
 
-struct LeFixupRecord
+struct LEFixupRecord
 {
 	uint8_t sourceType;
 	uint8_t targetType;
@@ -125,11 +125,11 @@ struct LeFixupRecord
 
 class MemMap;
 
-class LeImage : public Image
+class LEImage : public Image
 {
 	public:
-		LeImage( const std::string &fileName, uint32_t maxHeapSize );
-		virtual ~LeImage();
+		LEImage( const std::string &fileName, uint32_t maxHeapSize );
+		virtual ~LEImage();
 
 		virtual void load();
 
@@ -144,16 +144,16 @@ class LeImage : public Image
 		std::vector<MemMap *> mObjectMappings;
 		uint16_t mCodeSel;
 
-		LeHeader *findLeHeader( const MemMap &mem ) const;
-		void verifyHeader( const LeHeader *header ) const;
-		void mapObject( const MemMap &mem, const LeHeader *header,
-			const LeObjectTableEntry *object, const LePageTableEntry *pageTable,
+		LEHeader *findLEHeader( const MemMap &mem ) const;
+		void verifyHeader( const LEHeader *header ) const;
+		void mapObject( const MemMap &mem, const LEHeader *header,
+			const LEObjectTableEntry *object, const LEPageTableEntry *pageTable,
 			bool isStack );
-		void relocate( const MemMap &mem, const LeHeader *header,
-			const LeObjectTableEntry *objectTable, const LeFixupTableEntry *fixupTable,
-			const LeFixupRecord *fixupRecordTable );
+		void relocate( const MemMap &mem, const LEHeader *header,
+			const LEObjectTableEntry *objectTable, const LEFixupTableEntry *fixupTable,
+			const LEFixupRecord *fixupRecordTable );
 		int processRelocationRecord( int objectIdx, uint32_t objectOffset,
-			const LeFixupRecord *reloc );
+			const LEFixupRecord *reloc );
 
 		static uint32_t roundToPageSize( uint32_t size, uint32_t pageSize );
 };
