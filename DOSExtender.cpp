@@ -84,8 +84,30 @@ bool DOSExtender::handleInterrupt( uint8_t idx, Context &ctx )
 			TRACE( "DOS/4GW API" );
 			canResume = handleDOS4GW( ctx );
 			break;
+
+		// all other functions are forwarded to DOS with address translation as required
+		case 0x1A:
+			TRACE( "set disk transfer address\n" );
+			mDOS->setDTA( (char *) ctx.getEDX() );
+			break;
+		case 0x3B:
+			TRACE( "set current directory\n" );
+			mDOS->setCurrentDirectory( (char *) ctx.getEDX(), ctx );
+			break;
+		case 0x3D:
+			TRACE( "open\n" );
+			mDOS->fileOpen( (char *) ctx.getEDX(), ctx );
+			break;
+		case 0x40:
+			TRACE( "write\n" );
+			mDOS->fileWrite( (char *) ctx.getEDX(), ctx );
+			break;
+		case 0x47:
+			TRACE( "get current directory\n" );
+			mDOS->getCurrentDirectory( (char *) ctx.getESI(), ctx );
+			break;
 		default:
-			canResume = mDOS->handleInterrupt( idx, ctx );
+			canResume = mDOS->handleInterrupt( idx, ctx, NULL );
 	}
 
 	return canResume;

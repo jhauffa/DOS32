@@ -6,7 +6,8 @@
 #include <vector>
 
 #include "os/OS.h"
-#include "InterruptHandler.h"
+
+class Context;
 
 
 struct PSP
@@ -33,17 +34,23 @@ struct PSP
 } __attribute__ ((packed));
 
 
-class DOS : public InterruptHandler
+class DOS
 {
 	public:
 		DOS( int argc, char *argv[], char *envp[] );
 		~DOS();
 
-		virtual bool handleInterrupt( uint8_t idx, Context &ctx );
+		virtual bool handleInterrupt( uint8_t idx, Context &ctx, void *lowMemBase );
 
 		PSP *getPsp() const;
 		char *getEnvironment() const;
 		uint32_t getEnvironmentSize() const;
+
+		void setDTA( char *dta );
+		void setCurrentDirectory( char *path, Context &ctx );
+		void getCurrentDirectory( char *path, Context &ctx );
+		void fileOpen( char *filePath, Context &ctx );
+		void fileWrite( char *data, Context &ctx );
 
 	private:
 		PSP *mPsp;
@@ -54,6 +61,8 @@ class DOS : public InterruptHandler
 
 		void initPsp( int argc, char *argv[] );
 		void initEnvironment( char *envp[], const char *appName );
+
+		static void *translateAddress( void *base, uint16_t segment, uint16_t offset );
 };
 
 

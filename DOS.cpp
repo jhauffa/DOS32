@@ -85,7 +85,13 @@ void DOS::initEnvironment( char *envp[], const char *appName )
 	strcpy( &mEnvironment[unixEnvSize + 2], appName );
 }
 
-bool DOS::handleInterrupt( uint8_t idx, Context &ctx )
+void *DOS::translateAddress( void *base, uint16_t segment, uint16_t offset )
+{
+	assert( base != NULL );
+	return ((char *) base) + ((segment << 4) + offset);
+}
+
+bool DOS::handleInterrupt( uint8_t idx, Context &ctx, void *lowMemBase )
 {
 	// called from DOSExtender::handleInterrupt
 	assert( idx == 0x21 );
@@ -99,13 +105,12 @@ bool DOS::handleInterrupt( uint8_t idx, Context &ctx )
 	{
 		case 0x19:
 			TRACE( "get current default drive\n" );
+			FIXME( "stub\n" );
 			ctx.setAL( 0x02 );  // drive C
 			break;
 		case 0x1A:
 			TRACE( "set disk transfer address\n" );
-			// TODO: hack, hooked by DOS extender
-			mDta = (char *) ctx.getEDX();
-			TRACE( "new DTA = %p\n", mDta );
+			setDTA( (char *) translateAddress( lowMemBase, ctx.getDS(), ctx.getDX() ) );
 			break;
 		case 0x2C:
 			TRACE( "get system time\n" );
@@ -147,58 +152,38 @@ bool DOS::handleInterrupt( uint8_t idx, Context &ctx )
 			break;
 		case 0x3B:
 			TRACE( "set current directory\n" );
-			// TODO: hack, hooked by DOS extender
-			TRACE( "new CWD = \"%s\"\n", (char *) ctx.getEDX() );
-			ctx.setCF( true );
+			setCurrentDirectory( (char *) translateAddress( lowMemBase, ctx.getDS(),
+					ctx.getDX() ), ctx) ;
 			break;
 		case 0x3D:
 			TRACE( "open\n" );
-			// TODO: hack, hooked by DOS extender
-			TRACE( "file name = \"%s\"\n", (char *) ctx.getEDX() );
-			ctx.setAX( 0x0002 );  // file not found
-			ctx.setCF( true );
+			fileOpen( (char *) translateAddress( lowMemBase, ctx.getDS(), ctx.getDS() ),
+				ctx );
 			break;
 		case 0x40:
-		{
-			TRACE( "write, device = %u: ", ctx.getBX() );
-			char *data = (char *) ctx.getEDX();
-			for (int i = 0; i < ctx.getCX(); i++ )
-				TRACE( "%c", data[i] );
-			ctx.setAX( ctx.getCX() );
-			TRACE( "\n" );
+			TRACE( "write\n" );
+			fileWrite( (char *) translateAddress( lowMemBase, ctx.getDS(), ctx.getDS() ),
+				ctx );
 			break;
-		}
 		case 0x42:
 			TRACE( "lseek, device = %u\n", ctx.getBX() );
+			FIXME( "stub\n" );
 			ctx.setCF( true );
 			ctx.setAX( 0x0006 );  // invalid handle
 			break;
 		case 0x44:
 			TRACE( "IOCTL, function %d, device = %u\n", ctx.getAL(), ctx.getBX() );
-			// HACK
+			FIXME( "stub\n" );
 			if ( ctx.getBX() < 3 )
 				ctx.setDX( 0x40c3 );
 			else
 				canResume = false;
 			break;
 		case 0x47:
-		{
 			TRACE( "get current directory\n" );
-			uint8_t drive = ctx.getDL();
-			if ( ( drive == 0x00 ) || ( drive == 0x02 ) )
-			{
-				// TODO: hooked by DOS extender
-				char *buf = (char *) ctx.getESI();
-				strcpy( buf, "RIVA" );
-				ctx.setAX( 0x0100 );
-			}
-			else
-			{
-				ctx.setAX( 0x000F );
-				ctx.setCF( true );
-			}
+			getCurrentDirectory( (char *) translateAddress( lowMemBase, ctx.getDS(),
+					ctx.getSI() ), ctx );
 			break;
-		}
 		case 0x4C:
 			TRACE( "exit, return code = %u\n", ctx.getAL() );
 			OS::exitThread( ctx.getAL() );
@@ -209,4 +194,51 @@ bool DOS::handleInterrupt( uint8_t idx, Context &ctx )
 	}
 
 	return canResume;
+}
+
+void DOS::setDTA( char *dta )
+{
+	mDta = dta;
+	TRACE( "new DTA = %p\n", mDta );
+}
+
+void DOS::setCurrentDirectory( char *path, Context &ctx )
+{
+	FIXME( "stub\n" );
+	TRACE( "new CWD = \"%s\"\n", path );
+	ctx.setCF( true );
+}
+
+void DOS::getCurrentDirectory( char *path, Context &ctx )
+{
+	FIXME( "stub\n" );
+	uint8_t drive = ctx.getDL();
+	if ( ( drive == 0x00 ) || ( drive == 0x02 ) )
+	{
+		strcpy( path, "RIVA" );
+		ctx.setAX( 0x0100 );
+	}
+	else
+	{
+		ctx.setAX( 0x000F );
+		ctx.setCF( true );
+	}
+}
+
+void DOS::fileOpen( char *filePath, Context &ctx )
+{
+	FIXME( "stub\n" );
+	TRACE( "file name = \"%s\"\n", (char *) ctx.getEDX() );
+	ctx.setAX( 0x0002 );  // file not found
+	ctx.setCF( true );
+}
+
+void DOS::fileWrite( char *data, Context &ctx )
+{
+	FIXME( "stub\n" );
+	TRACE( "device = %u: ", ctx.getBX() );
+	for (int i = 0; i < ctx.getCX(); i++ )
+		TRACE( "%c", data[i] );
+	ctx.setAX( ctx.getCX() );
+	TRACE( "\n" );
 }
