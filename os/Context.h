@@ -101,11 +101,6 @@ class Context
 		virtual uint16_t getGS() const = 0;
 		virtual void setGS( uint16_t value ) = 0;
 
-		virtual uint32_t getReg32( int idx ) const;
-		virtual void setReg32( int idx, uint32_t value );
-		virtual uint16_t getSegReg( int idx ) const;
-		virtual void setSegReg( int idx, uint16_t value );
-
 		virtual void dump() const;
 };
 

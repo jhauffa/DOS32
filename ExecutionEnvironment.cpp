@@ -4,7 +4,6 @@
 #include "os/OS.h"
 #include "os/ExceptionInfo.h"
 #include "Debug.h"
-#include "Registers.h"
 #include "DOS.h"
 #include "DOSExtender.h"
 #include "DPMI.h"
@@ -63,13 +62,10 @@ void ExecutionEnvironment::memoryExceptionHandler( ExceptionInfo &info )
 {
 	Context &ctx = info.getMutableContext();
 	uint8_t *eip = (uint8_t *) ctx.getEIP();
+	int instrSize = 0;
 	bool canResume = true;
 
-	// parse instruction prefix
-	int instrSize = decodePrefix( eip );
-	eip += instrSize;
-
-	// parse instruction
+	// parse instruction (assume that no relevant instruction can have a prefix)
 	switch ( eip[0] )
 	{
 		case 0xCD:
@@ -116,34 +112,4 @@ void ExecutionEnvironment::consoleInterruptHandler( ExceptionInfo &info )
 	const Context &ctx = info.getContext();
 	TRACE( "\nlast EIP = 0x%x\n", ctx.getEIP() );
 	exit( 3 );
-}
-
-int ExecutionEnvironment::decodePrefix( uint8_t *data )
-{
-	int instrStart = 0;
-	bool foundInstr = false;
-	while ( !foundInstr )
-	{
-		switch ( data[instrStart] )
-		{
-			case 0x66:	// data size override
-			case 0x67:	// address size override
-			case 0x26:	// ES
-			case 0x2E:	// CS
-			case 0x36:	// SS
-			case 0x3E:	// DS
-			case 0x64:	// FS
-			case 0x65:	// GS
-			case 0xF0:	// LOCK
-			case 0xF2:	// REPNE
-			case 0xF3:	// REP
-				break;
-			default:
-				foundInstr = true;
-				break;
-		}
-		if ( !foundInstr )
-			instrStart++;
-	}
-	return instrStart;
 }
