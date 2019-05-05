@@ -42,14 +42,7 @@ class ExecutionEnvironment : public Singleton<ExecutionEnvironment>
 		static void memoryExceptionHandler( ExceptionInfo &info );
 		static void consoleInterruptHandler( ExceptionInfo &info );
 
-		static bool handleSegmentRegisterAccess( uint8_t *data, Context &ctx,
-			bool addrSizeOverride, int &instrSize );
-		static bool loadSelectorAlias( Context &ctx, int segmentReg, uint16_t selector );
-
-		static int decodePrefix( uint8_t *data, int &segmentOverride,
-			bool &dataSizeOverride, bool &addrSizeOverride );
-		static int decodeModRm( uint8_t *data, const Context &ctx, bool addrSizeOverride,
-			int &regOp1, int &regOp2, uint32_t &memOp, bool &hasMemOp );
+		static int decodePrefix( uint8_t *data );
 };
 
 DEFINE_INSTANCE( ExecutionEnvironment );

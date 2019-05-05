@@ -5,21 +5,14 @@
 
 
 Descriptor::Descriptor( uint16_t sel ) :
-	mType( DESC_TYPE_OS ), mBase( 0 ), mLimit( 0xFFFFFFFF ), mSel( sel ), mAliasSel( 0 ),
-	mLDT( NULL )
+	mType( DESC_TYPE_OS ), mBase( 0 ), mLimit( 0xFFFFFFFF ), mSel( sel ), mLDT( NULL )
 {
 }
 
 Descriptor::Descriptor( LDT *ldt, uint32_t base, uint32_t limit ) :
-	mType( DESC_TYPE_LDT ), mBase( base ), mLimit( limit ), mAliasSel( 0 ), mLDT( ldt )
+	mType( DESC_TYPE_LDT ), mBase( base ), mLimit( limit ), mLDT( ldt )
 {
 	mSel = mLDT->allocDesc( base, limit );
-}
-
-Descriptor::Descriptor( uint16_t sel, uint16_t aliasSel ) :
-	mType( DESC_TYPE_ALIAS ), mBase( 0 ), mLimit( 0 ), mSel( sel ), mAliasSel( aliasSel ),
-	mLDT( NULL )
-{
 }
 
 Descriptor::~Descriptor()
@@ -48,26 +41,11 @@ uint16_t Descriptor::getSel() const
 	return mSel;
 }
 
-uint16_t Descriptor::getAliasSel() const
-{
-	return mAliasSel;
-}
-
 bool Descriptor::setLimit( uint32_t limit )
 {
 	if ( mType == DESC_TYPE_LDT )
 	{
 		mLDT->setLimit( mSel, limit );
-		return true;
-	}
-	return false;
-}
-
-bool Descriptor::setAliasSel( uint16_t aliasSel )
-{
-	if ( mType != DESC_TYPE_LDT )
-	{
-		mAliasSel = aliasSel;
 		return true;
 	}
 	return false;
@@ -104,15 +82,12 @@ DescriptorTable::~DescriptorTable()
 	delete mLDT;
 }
 
-Descriptor *DescriptorTable::getDesc( uint16_t sel, bool resolveAlias )
+Descriptor *DescriptorTable::getDesc( uint16_t sel )
 {
-	Descriptor *desc = NULL;
 	std::map<uint16_t, Descriptor *>::const_iterator pos = mDesc.find( sel );
 	if ( pos != mDesc.end() )
-		desc = pos->second;
-	if ( resolveAlias && ( desc && ( desc->getType() == DESC_TYPE_ALIAS ) ) )
-		desc = getDesc( desc->getAliasSel(), false );
-	return desc;
+		return pos->second;
+	return NULL;
 }
 
 void DescriptorTable::allocOsDesc( uint16_t sel )
@@ -130,25 +105,12 @@ void DescriptorTable::allocLDTDesc( uint32_t base, uint32_t limit, uint16_t &sel
 		delete desc;
 }
 
-void DescriptorTable::allocAliasDesc( uint16_t sel, uint16_t aliasSel )
-{
-	Descriptor *desc = getDesc( sel, false );
-	if ( !desc )
-	{
-		desc = new Descriptor( sel, aliasSel );
-		if ( !setDesc( sel, desc ) )
-			delete desc;
-	}
-	else
-		desc->setAliasSel( aliasSel );
-}
-
 bool DescriptorTable::setDesc( uint16_t sel, Descriptor *desc )
 {
 	if ( sel == 0 )
 		return false;
 
-	if ( getDesc( sel, false ) != NULL )
+	if ( getDesc( sel ) != NULL )
 	{
 		if ( desc->getType() != DESC_TYPE_OS )
 			ERR( "selector 0x%02x already exists\n", sel );

@@ -60,7 +60,7 @@ bool DPMI::handleInterrupt( uint8_t idx, Context &ctx )
 		{
 			uint16_t sel = ctx.getBX();
 			TRACE( "get selector base, selector 0x%04x\n", sel );
-			Descriptor *desc = mEnv->getDescriptorTable().getDesc( sel, true );
+			Descriptor *desc = mEnv->getDescriptorTable().getDesc( sel );
 			if ( desc )
 			{
 				uint32_t base = desc->getBase();
@@ -78,7 +78,7 @@ bool DPMI::handleInterrupt( uint8_t idx, Context &ctx )
 		case 0x0500:
 		{
 			TRACE( "get free memory information\n" );
-			Descriptor *desc = mEnv->getDescriptorTable().getDesc( ctx.getES(), true );
+			Descriptor *desc = mEnv->getDescriptorTable().getDesc( ctx.getES() );
 			if ( !desc )
 				break;
 

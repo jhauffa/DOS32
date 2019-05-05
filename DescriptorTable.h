@@ -10,8 +10,7 @@
 
 enum DescriptorType {
 	DESC_TYPE_OS,		// provided by OS
-	DESC_TYPE_LDT,		// in Local Descriptor Table
-	DESC_TYPE_ALIAS		// emulated in exception handler
+	DESC_TYPE_LDT		// in Local Descriptor Table
 };
 
 class Descriptor
@@ -19,24 +18,20 @@ class Descriptor
 	public:
 		Descriptor( uint16_t sel );  // OS descriptor
 		Descriptor( LDT *ldt, uint32_t base, uint32_t limit );  // LDT descriptor
-		Descriptor( uint16_t sel, uint16_t aliasSel );  // alias descriptor
 		~Descriptor();
 
 		DescriptorType getType() const;
 		uint32_t getLimit() const;
 		uint32_t getBase() const;
 		uint16_t getSel() const;
-		uint16_t getAliasSel() const;
 
 		bool setLimit( uint32_t limit );
-		bool setAliasSel( uint16_t aliasSel );
 
 	private:
 		DescriptorType mType;
 		uint32_t mBase;
 		uint32_t mLimit;
 		uint16_t mSel;
-		uint16_t mAliasSel;
 		LDT *mLDT;
 };
 
@@ -46,11 +41,10 @@ class DescriptorTable
 		DescriptorTable();
 		~DescriptorTable();
 
-		Descriptor *getDesc( uint16_t sel, bool resolveAlias );
+		Descriptor *getDesc( uint16_t sel );
 
 		void allocOsDesc( uint16_t sel );
 		void allocLDTDesc( uint32_t base, uint32_t limit, uint16_t &sel );
-		void allocAliasDesc( uint16_t sel, uint16_t aliasSel );
 
 		uint16_t getOsCodeSel() const;
 		uint16_t getOsDataSel() const;

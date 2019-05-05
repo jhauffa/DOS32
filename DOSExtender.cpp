@@ -61,7 +61,7 @@ bool DOSExtender::handleInterrupt( uint8_t idx, Context &ctx )
 			TRACE( "resize segment 0x%02x, new limit = 0x%x\n", sel, newLimit );
 
 			DescriptorTable &descTable = mEnv->getDescriptorTable();
-			Descriptor *desc = descTable.getDesc( sel, true );
+			Descriptor *desc = descTable.getDesc( sel );
 			if ( desc && ( desc->getSel() == descTable.getOsDataSel() ) )
 			{
 				if ( newLimit > (uint32_t) mImage->getHeapEnd() )
