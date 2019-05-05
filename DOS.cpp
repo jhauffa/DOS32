@@ -1,13 +1,23 @@
 
 #include <cstring>
+#include <cctype>
 
 #include "Debug.h"
 #include "DOS.h"
 
 
-DOS::DOS( int argc, char *argv[], char *envp[] )
+DOS::DOS( int argc, char *argv[], char *envp[] ) :
+	mLastError( DOSException::ERROR_NO_ERROR ), mVolumeManager()
 {
 	mTime = OS::createTime();
+
+	// create standard file handles
+	mOpenFiles.reserve( NUM_FILE_HANDLES );
+	mOpenFiles.push_back( mVolumeManager.createConsole( stdin ) );
+	mOpenFiles.push_back( mVolumeManager.createConsole( stdout ) );
+	mOpenFiles.push_back( mVolumeManager.createConsole( stderr ) );
+	mOpenFiles.push_back( NULL );  // TODO: STDAUX
+	mOpenFiles.push_back( NULL );  // TODO: STDPRN
 
 	// TODO: convert/filter path names and env. variables (or load everything from cfg.)
 	initPsp( argc, argv );
@@ -44,7 +54,7 @@ void DOS::initPsp( int argc, char *argv[] )
 
 	mPsp->callInt20 = 0x20CD;
 	mPsp->callDosFar[0] = 0xCC;
-	mPsp->numFileHandles = 20;
+	mPsp->numFileHandles = NUM_FILE_HANDLES;
 	mPsp->fileHandleTablePtr = 0x12;
 	mPsp->callInt21Retf[0] = 0xCD;
 	mPsp->callInt21Retf[1] = 0x21;
@@ -103,10 +113,14 @@ bool DOS::handleInterrupt( uint8_t idx, Context &ctx, void *lowMemBase )
 
 	switch ( functionIdx )
 	{
+		case 0x0E:
+			TRACE( "set current drive\n" );
+			mVolumeManager.setCurrentDrive( ctx.getDL() );
+			ctx.setAL( mVolumeManager.getMaxDrive() );
+			break;
 		case 0x19:
-			TRACE( "get current default drive\n" );
-			FIXME( "stub\n" );
-			ctx.setAL( 0x02 );  // drive C
+			TRACE( "get current drive\n" );
+			ctx.setAL( mVolumeManager.getCurrentDrive() );
 			break;
 		case 0x1A:
 			TRACE( "set disk transfer address\n" );
@@ -166,18 +180,18 @@ bool DOS::handleInterrupt( uint8_t idx, Context &ctx, void *lowMemBase )
 				ctx );
 			break;
 		case 0x42:
-			TRACE( "lseek, device = %u\n", ctx.getBX() );
-			FIXME( "stub\n" );
-			ctx.setCF( true );
-			ctx.setAX( 0x0006 );  // invalid handle
+			TRACE( "seek\n" );
+			fileSeek( ctx );
 			break;
 		case 0x44:
-			TRACE( "IOCTL, function %d, device = %u\n", ctx.getAL(), ctx.getBX() );
-			FIXME( "stub\n" );
-			if ( ctx.getBX() < 3 )
-				ctx.setDX( 0x40c3 );
-			else
+			TRACE( "IOCTL\n" );
+			if ( ctx.getAL() != 0 )
+			{
+				FIXME( "sub-function 0x%02x not implemented\n", ctx.getAL() );
 				canResume = false;
+				break;
+			}
+			fileGetDeviceFlags( ctx );
 			break;
 		case 0x47:
 			TRACE( "get current directory\n" );
@@ -187,6 +201,19 @@ bool DOS::handleInterrupt( uint8_t idx, Context &ctx, void *lowMemBase )
 		case 0x4C:
 			TRACE( "exit, return code = %u\n", ctx.getAL() );
 			OS::exitThread( ctx.getAL() );
+			break;
+		case 0x59:
+			TRACE( "get extended error information\n" );
+			if ( ctx.getBX() != 0 )
+			{
+				FIXME( "sub-function 0x%04x not implemented\n", ctx.getBX() );
+				canResume = false;
+				break;
+			}
+			ctx.setAX( mLastError.getErrorCode() );
+			ctx.setBH( mLastError.getErrorClass() );
+			ctx.setBL( mLastError.getRecommendedAction() );
+			ctx.setCH( mLastError.getErrorLocus() );
 			break;
 		default:
 			FIXME( "not implemented\n" );
@@ -199,46 +226,122 @@ bool DOS::handleInterrupt( uint8_t idx, Context &ctx, void *lowMemBase )
 void DOS::setDTA( char *dta )
 {
 	mDta = dta;
-	TRACE( "new DTA = %p\n", mDta );
+}
+
+void DOS::convertDOSException( const DOSException &ex, Context &ctx )
+{
+	mLastError = ex;
+	ctx.setCF( true );
+	ctx.setAX( ex.getErrorCode() );
+}
+
+uint8_t DOS::extractDrive( const std::string &pathName )
+{
+	if ( ( pathName.length() > 1 ) && ( pathName[1] == ':' ) )
+		return (uint8_t) std::toupper( pathName[0] ) - 'A';
+	return mVolumeManager.getCurrentDrive();
+}
+
+File *DOS::getOpenFile( uint16_t handle )
+{
+	if ( handle >= mOpenFiles.size() )
+		throw new DOSException( DOSException::ERROR_INVALID_HANDLE );
+	File *f = mOpenFiles[handle];
+	if ( !f )
+		throw new DOSException( DOSException::ERROR_INVALID_HANDLE );
+	return f;
 }
 
 void DOS::setCurrentDirectory( char *path, Context &ctx )
 {
-	FIXME( "stub\n" );
-	TRACE( "new CWD = \"%s\"\n", path );
-	ctx.setCF( true );
+	TRACE( "path = %s\n", path );
+	try
+	{
+		mVolumeManager.getVolume( extractDrive( path ) ).setCurrentPath( path );
+	}
+	catch ( const DOSException &ex )
+	{
+		convertDOSException( ex, ctx );
+	}
 }
 
 void DOS::getCurrentDirectory( char *path, Context &ctx )
 {
-	FIXME( "stub\n" );
-	uint8_t drive = ctx.getDL();
-	if ( ( drive == 0x00 ) || ( drive == 0x02 ) )
+	try
 	{
-		strcpy( path, "RIVA" );
+		uint8_t drive = ctx.getDL();
+		if ( drive == 0 )
+			drive = mVolumeManager.getCurrentDrive();
+		else
+			drive--;
+
+		const std::string &pathName = mVolumeManager.getVolume( drive ).getCurrentPath();
+		strcpy( path, pathName.c_str() );
 		ctx.setAX( 0x0100 );
 	}
-	else
+	catch ( const DOSException &ex )
 	{
-		ctx.setAX( 0x000F );
-		ctx.setCF( true );
+		convertDOSException( ex, ctx );
 	}
 }
 
-void DOS::fileOpen( char *filePath, Context &ctx )
+void DOS::fileOpen( char *path, Context &ctx )
 {
-	FIXME( "stub\n" );
-	TRACE( "file name = \"%s\"\n", (char *) ctx.getEDX() );
-	ctx.setAX( 0x0002 );  // file not found
-	ctx.setCF( true );
+	TRACE( "path = %s\n", path );
+	try
+	{
+		File *f = mVolumeManager.getVolume( extractDrive( path ) ).createFile( path );
+		uint16_t handle = mOpenFiles.size();
+		if ( handle >= NUM_FILE_HANDLES )
+			throw DOSException( DOSException::ERROR_OUT_OF_HANDLES );
+		mOpenFiles.push_back( f );
+		ctx.setAX( handle );
+	}
+	catch ( const DOSException &ex )
+	{
+		convertDOSException( ex, ctx );
+	}
 }
 
 void DOS::fileWrite( char *data, Context &ctx )
 {
-	FIXME( "stub\n" );
-	TRACE( "device = %u: ", ctx.getBX() );
-	for (int i = 0; i < ctx.getCX(); i++ )
-		TRACE( "%c", data[i] );
-	ctx.setAX( ctx.getCX() );
-	TRACE( "\n" );
+	try
+	{
+		File *f = getOpenFile( ctx.getBX() );
+		// TODO: does DOS/4GW use ECX/EAX?
+		ctx.setAX( f->write( data, ctx.getCX() ) & 0xFFFF );
+	}
+	catch ( const DOSException &ex )
+	{
+		convertDOSException( ex, ctx );
+	}
+}
+
+void DOS::fileSeek( Context &ctx )
+{
+	try
+	{
+		File *f = getOpenFile( ctx.getBX() );
+		size_t newPos = f->seek( ( ctx.getCX() << 16 ) | ctx.getDX(),
+			(File::SeekMode) ctx.getAL() );
+		ctx.setDX( ( newPos >> 16 ) & 0xFFFF );
+		ctx.setAX( newPos & 0xFFFF );
+	}
+	catch ( const DOSException &ex )
+	{
+		convertDOSException( ex, ctx );
+	}
+}
+
+void DOS::fileGetDeviceFlags( Context &ctx )
+{
+	try
+	{
+		File *f = getOpenFile( ctx.getBX() );
+		ctx.setDX( f->getDeviceFlags() );
+	}
+	catch ( const DOSException &ex )
+	{
+		convertDOSException( ex, ctx );
+	}
 }

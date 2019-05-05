@@ -6,6 +6,8 @@
 #include <vector>
 
 #include "os/OS.h"
+#include "DOSException.h"
+#include "Volume.h"
 
 class Context;
 
@@ -49,8 +51,10 @@ class DOS
 		void setDTA( char *dta );
 		void setCurrentDirectory( char *path, Context &ctx );
 		void getCurrentDirectory( char *path, Context &ctx );
-		void fileOpen( char *filePath, Context &ctx );
+		void fileOpen( char *path, Context &ctx );
 		void fileWrite( char *data, Context &ctx );
+		void fileSeek( Context &ctx );
+		void fileGetDeviceFlags( Context &ctx );
 
 	private:
 		PSP *mPsp;
@@ -58,9 +62,17 @@ class DOS
 		uint32_t mEnvironmentSize;
 		Time *mTime;
 		char *mDta;
+		DOSException mLastError;
+		VolumeManager mVolumeManager;
+		std::vector<File *> mOpenFiles;
 
 		void initPsp( int argc, char *argv[] );
 		void initEnvironment( char *envp[], const char *appName );
+		void convertDOSException( const DOSException &ex, Context &ctx );
+		uint8_t extractDrive( const std::string &pathName );
+		File *getOpenFile( uint16_t handle );
+
+		static const uint8_t NUM_FILE_HANDLES = 20;
 
 		static void *translateAddress( void *base, uint16_t segment, uint16_t offset );
 };
