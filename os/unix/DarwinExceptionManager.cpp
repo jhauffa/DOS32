@@ -27,7 +27,8 @@ DarwinExceptionManager::DarwinExceptionManager() :
 	asm ( "mov %%ds, %%ax\n\t" : "=a" (mOSDataSel) );
 	asm ( "mov %%gs, %%ax\n\t" : "=a" (mOSThreadSel) );
 
-	// allocate space for code restoring the segment registers after leaving the signal handler
+	// allocate space for code restoring the segment registers after leaving the signal
+	// handler
 	mRestoreSegRegsCode = new UnixMemMap( 4096,
 		MemMap::ACC_READ | MemMap::ACC_WRITE | MemMap::ACC_EXEC );
 
@@ -102,9 +103,10 @@ void DarwinExceptionManager::emitFarJump( uint8_t *&buf, uint16_t sel, uint32_t 
 void DarwinExceptionManager::signalHandler( int sig, siginfo_t *info, void *data )
 {
 	DarwinExceptionInfo exc( sig, info, data );
+	Context &ctx = exc.getMutableContext();
 
 	if ( ( ++mReenterCount > 1 ) ||
-	     mRestoreSegRegsCode->isInRange( reinterpret_cast<void *>( exc.getContext().getEIP() ) ) )
+	     mRestoreSegRegsCode->isInRange( reinterpret_cast<void *>( ctx.getEIP() ) ) )
 	{
 		ERR( "bad memory access in emulator code\n" );
 		exc.dump();
@@ -140,11 +142,11 @@ void DarwinExceptionManager::signalHandler( int sig, siginfo_t *info, void *data
 		exit( 3 );
 	}
 
-	/* MacOS preserves the content of the segment registers on context switches, but resets them to
-	   default values on return from a signal handler (see set_thread_state32 in osfmk/i386/pcb.c of
-	   the XNU source code). Since loading a segment register is expensive, we build a custom piece
-	   of code that restores all segment registers that have been modified by the DOS program. */
-	Context &ctx = exc.getContext();
+	/* MacOS preserves the content of the segment registers on context switches, but
+	   resets them to default values on return from a signal handler (see
+	   set_thread_state32 in osfmk/i386/pcb.c of the XNU source code). Since loading a
+	   segment register is expensive, we build a custom piece of code that restores all
+	   segment registers that have been modified by the DOS program. */
 	uint8_t *bufBase = reinterpret_cast<uint8_t *>( mRestoreSegRegsCode->getPtr() );
 	uint8_t *buf = bufBase;
 	if ( ctx.getSS() != mOSDataSel )

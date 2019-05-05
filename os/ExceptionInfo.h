@@ -10,10 +10,11 @@ class ExceptionInfo
 	public:
 		virtual ~ExceptionInfo() {}
 		
-		virtual void *getFaultAddr() = 0;
-		virtual Context &getContext() = 0;
+		virtual void *getFaultAddr() const = 0;
+		virtual const Context &getContext() const = 0;
+		virtual Context &getMutableContext() = 0;
 
-		virtual void dump();
+		virtual void dump() const;
 };
 
 

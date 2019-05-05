@@ -6,7 +6,7 @@
 #include "os/Context.h"
 
 
-uint32_t Context::getReg32( int idx )
+uint32_t Context::getReg32( int idx ) const
 {
 	switch ( idx )
 	{
@@ -61,7 +61,7 @@ void Context::setReg32( int idx, uint32_t value )
 	}
 }
 
-uint16_t Context::getSegReg( int idx )
+uint16_t Context::getSegReg( int idx ) const
 {
 	switch ( idx )
 	{
@@ -106,7 +106,7 @@ void Context::setSegReg( int idx, uint16_t value )
 	}
 }
 
-void Context::dump()
+void Context::dump() const
 {
 	fprintf( stderr, "EAX = 0x%08x  EBX = 0x%08x  ECX = 0x%08x  EDX = 0x%08x\n",
 		getEAX(), getEBX(), getECX(), getEDX() );

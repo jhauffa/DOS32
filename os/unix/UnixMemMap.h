@@ -41,7 +41,7 @@ class UnixMemMap : public MemMap
 		};
 		std::list<SubMapping> mSubMappings;
 
-		int convertFlags( int access );
+		static int convertFlags( int access );
 };
 
 

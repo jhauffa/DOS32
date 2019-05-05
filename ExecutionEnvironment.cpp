@@ -61,7 +61,7 @@ int ExecutionEnvironment::appThreadProc( void *data )
 
 void ExecutionEnvironment::memoryExceptionHandler( ExceptionInfo &info )
 {
-	Context &ctx = info.getContext();
+	Context &ctx = info.getMutableContext();
 	uint8_t *eip = (uint8_t *) ctx.getEIP();
 	bool canResume = true;
 
@@ -132,7 +132,7 @@ void ExecutionEnvironment::memoryExceptionHandler( ExceptionInfo &info )
 
 void ExecutionEnvironment::consoleInterruptHandler( ExceptionInfo &info )
 {
-	Context &ctx = info.getContext();
+	const Context &ctx = info.getContext();
 	TRACE( "\nlast EIP = 0x%x\n", ctx.getEIP() );
 	exit( 3 );
 }
@@ -224,8 +224,8 @@ int ExecutionEnvironment::decodePrefix( uint8_t *data, int &segmentOverride,
 	return instrStart;
 }
 
-int ExecutionEnvironment::decodeModRm( uint8_t *data, Context &ctx, bool addrSizeOverride,
-	int &regOp1, int &regOp2, uint32_t &memOp, bool &hasMemOp )
+int ExecutionEnvironment::decodeModRm( uint8_t *data, const Context &ctx,
+	bool addrSizeOverride, int &regOp1, int &regOp2, uint32_t &memOp, bool &hasMemOp )
 {
 	if ( addrSizeOverride )
 		FIXME( "address size override\n" );

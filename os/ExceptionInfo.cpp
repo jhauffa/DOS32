@@ -5,9 +5,9 @@
 #include "os/Context.h"
 
 
-void ExceptionInfo::dump()
+void ExceptionInfo::dump() const
 {
-	Context &ctx = getContext();
+	const Context &ctx = getContext();
 	ctx.dump();
 
 	uint8_t *eip = (uint8_t *) ctx.getEIP();

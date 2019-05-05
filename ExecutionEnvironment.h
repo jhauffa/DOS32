@@ -48,7 +48,7 @@ class ExecutionEnvironment : public Singleton<ExecutionEnvironment>
 
 		static int decodePrefix( uint8_t *data, int &segmentOverride,
 			bool &dataSizeOverride, bool &addrSizeOverride );
-		static int decodeModRm( uint8_t *data, Context &ctx, bool addrSizeOverride,
+		static int decodeModRm( uint8_t *data, const Context &ctx, bool addrSizeOverride,
 			int &regOp1, int &regOp2, uint32_t &memOp, bool &hasMemOp );
 };
 

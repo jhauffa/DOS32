@@ -16,35 +16,26 @@ DarwinExceptionInfo::~DarwinExceptionInfo()
 	delete mContext;
 }
 
-void *DarwinExceptionInfo::getFaultAddr()
+void *DarwinExceptionInfo::getFaultAddr() const
 {
 	return mInfo->si_addr;
 }
 
-Context &DarwinExceptionInfo::getContext()
+const Context &DarwinExceptionInfo::getContext() const
 {
 	return *mContext;
 }
 
-void DarwinExceptionInfo::dump()
+Context &DarwinExceptionInfo::getMutableContext()
 {
-	const char *sigName;
-	const char *codeExp;
-	getSignalName( mSignal, mInfo->si_code, sigName, codeExp );
-
-	fprintf( stderr, "\nsignal %s (%d), %s (code %d)\n", sigName, mSignal, codeExp,
-		mInfo->si_code );
-	fprintf( stderr, "fault address = %p\n", mInfo->si_addr );
-
-	ExceptionInfo::dump();
+	return *mContext;
 }
 
-void DarwinExceptionInfo::getSignalName( int sig, int code, const char *&sigName,
-	const char *&codeExp )
+void DarwinExceptionInfo::dump() const
 {
-	sigName = "unknown";
-	codeExp = sigName;
-	if ( sig == SIGSEGV )
+	const char *sigName = "unknown";
+	const char *codeExp = sigName;
+	if ( mSignal == SIGSEGV )
 	{
 		sigName = "SIGSEGV";
 		switch ( mInfo->si_code )
@@ -57,7 +48,7 @@ void DarwinExceptionInfo::getSignalName( int sig, int code, const char *&sigName
 				break;
 		}
 	}
-	else if ( sig == SIGBUS )
+	else if ( mSignal == SIGBUS )
 	{
 		sigName = "SIGBUS";
 		switch ( mInfo->si_code )
@@ -73,4 +64,9 @@ void DarwinExceptionInfo::getSignalName( int sig, int code, const char *&sigName
 				break;
 		}
 	}
+	fprintf( stderr, "\nsignal %s (%d), %s (code %d)\n", sigName, mSignal, codeExp,
+		mInfo->si_code );
+	fprintf( stderr, "fault address = %p\n", mInfo->si_addr );
+
+	ExceptionInfo::dump();
 }

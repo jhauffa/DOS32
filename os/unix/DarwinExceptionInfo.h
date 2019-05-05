@@ -13,18 +13,16 @@ class DarwinExceptionInfo : public ExceptionInfo
 		DarwinExceptionInfo( int sig, siginfo_t *info, void *data );
 		virtual ~DarwinExceptionInfo();
 
-		virtual void *getFaultAddr();
-		virtual Context &getContext();
+		virtual void *getFaultAddr() const;
+		virtual const Context &getContext() const;
+		virtual Context &getMutableContext();
 
-		virtual void dump();
+		virtual void dump() const;
 
 	private:
 		int mSignal;
 		siginfo_t *mInfo;
 		Context *mContext;
-
-		void getSignalName( int sig, int code, const char *&sigName,
-			const char *&codeExp );
 };
 
 
