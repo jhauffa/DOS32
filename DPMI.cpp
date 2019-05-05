@@ -1,5 +1,5 @@
 
-#include <string.h>
+#include <cstring>
 
 #include "os/OS.h"
 #include "os/OSException.h"

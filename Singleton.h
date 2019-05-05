@@ -2,7 +2,7 @@
 #ifndef __DOS32_SINGLETON_H__
 #define __DOS32_SINGLETON_H__
 
-#include <assert.h>
+#include <cassert>
 
 
 #define DEFINE_INSTANCE( c )  template<> c *Singleton<c>::mInstance

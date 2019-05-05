@@ -3,7 +3,7 @@
 #define __DOS32_LE_IMAGE_H__
 
 #include <vector>
-#include <stdint.h>
+#include <cstdint>
 
 #include "Image.h"
 

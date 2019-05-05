@@ -2,7 +2,7 @@
 #ifndef __DOS32_INTERRUPT_HANDLER_H__
 #define __DOS32_INTERRUPT_HANDLER_H__
 
-#include <stdint.h>
+#include <cstdint>
 
 class Context;
 

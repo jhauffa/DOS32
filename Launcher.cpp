@@ -1,6 +1,6 @@
 
 #include <string>
-#include <stdio.h>
+#include <cstdio>
 
 #include "Exception.h"
 #include "Image.h"

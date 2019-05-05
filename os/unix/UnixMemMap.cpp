@@ -2,7 +2,7 @@
 #include <sys/mman.h>
 #include <unistd.h>
 #include <fcntl.h>
-#include <errno.h>
+#include <cerrno>
 
 #include "Debug.h"
 #include "os/unix/UnixException.h"

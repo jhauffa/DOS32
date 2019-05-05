@@ -2,7 +2,7 @@
 #ifndef __DOS32_DOS_EXTENDER_H__
 #define __DOS32_DOS_EXTENDER_H__
 
-#include <stdint.h>
+#include <cstdint>
 
 #include "os/Context.h"
 #include "InterruptHandler.h"

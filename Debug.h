@@ -2,8 +2,8 @@
 #ifndef __DOS32_DEBUG_H__
 #define __DOS32_DEBUG_H__
 
-#include <stdio.h>
-#include <assert.h>
+#include <cstdio>
+#include <cassert>
 
 #define __MSG__(format, ...)	fprintf( stderr, format, ## __VA_ARGS__ )
 

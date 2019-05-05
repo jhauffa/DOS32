@@ -1,7 +1,7 @@
 
 #include <architecture/i386/table.h>
 #include <i386/user_ldt.h>
-#include <string.h>
+#include <cstring>
 
 #include "os/unix/UnixException.h"
 #include "os/unix/DarwinLdt.h"

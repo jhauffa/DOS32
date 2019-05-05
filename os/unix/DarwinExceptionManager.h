@@ -3,8 +3,8 @@
 #define __DOS32_OS_UNIX_DARWIN_EXCEPTION_MANAGER__
 
 #include <map>
-#include <signal.h>
-#include <stdint.h>
+#include <csignal>
+#include <cstdint>
 
 #include "Singleton.h"
 #include "os/ExceptionManager.h"

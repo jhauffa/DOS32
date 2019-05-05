@@ -2,7 +2,7 @@
 #ifndef __DOS32_OS_UNIX_DARWIN_EXCEPTION_INFO_H__
 #define __DOS32_OS_UNIX_DARWIN_EXCEPTION_INFO_H__
 
-#include <signal.h>
+#include <csignal>
 
 #include "os/ExceptionInfo.h"
 

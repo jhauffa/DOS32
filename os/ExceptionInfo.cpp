@@ -1,5 +1,5 @@
 
-#include <stdio.h>
+#include <cstdio>
 
 #include "os/ExceptionInfo.h"
 #include "os/Context.h"

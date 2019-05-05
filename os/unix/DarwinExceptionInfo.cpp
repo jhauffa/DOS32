@@ -1,5 +1,5 @@
 
-#include <stdio.h>
+#include <cstdio>
 
 #include "os/unix/DarwinContext.h"
 #include "os/unix/DarwinExceptionInfo.h"

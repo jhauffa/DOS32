@@ -2,7 +2,7 @@
 #ifndef __DOS32_OS_UNIX_DATE_TIME_H__
 #define __DOS32_OS_UNIX_DATE_TIME_H__
 
-#include <time.h>
+#include <ctime>
 
 #include "os/DateTime.h"
 

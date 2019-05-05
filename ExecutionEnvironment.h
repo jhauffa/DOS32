@@ -2,7 +2,7 @@
 #ifndef __DOS32_EXECUTION_ENVIRONMENT_H__
 #define __DOS32_EXECUTION_ENVIRONMENT_H__
 
-#include <stdint.h>
+#include <cstdint>
 #include <map>
 
 #include "Singleton.h"

@@ -1,5 +1,5 @@
 
-#include <stdio.h>
+#include <cstdio>
 
 #include "Debug.h"
 #include "Registers.h"

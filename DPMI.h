@@ -3,7 +3,7 @@
 #define __DOS32_DPMI_H__
 
 #include <map>
-#include <stdint.h>
+#include <cstdint>
 
 #include "InterruptHandler.h"
 

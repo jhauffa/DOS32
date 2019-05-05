@@ -1,5 +1,5 @@
 
-#include <string.h>
+#include <cstring>
 
 #include "Debug.h"
 #include "DOS.h"
