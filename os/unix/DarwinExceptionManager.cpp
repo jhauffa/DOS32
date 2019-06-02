@@ -113,9 +113,8 @@ void DarwinExceptionManager::signalHandler( int sig, siginfo_t *info, void *data
 		exit( 3 );
 	}
 
-	DarwinExceptionManager &inst = getInstance();
 	ExceptionHandler handler = NULL;
-
+	DarwinExceptionManager &inst = getInstance();
 	switch ( sig )
 	{
 		case SIGBUS:
@@ -125,20 +124,15 @@ void DarwinExceptionManager::signalHandler( int sig, siginfo_t *info, void *data
 		case SIGINT:
 			handler = inst.mConsoleInterruptHandler;
 			break;
+		default:
+			ERR( "unexpected signal %d\n", sig );
+			exit( 3 );
 	}
 
-	if ( handler )
+	handler( exc );
+	if ( *inst.mStackBottom != CANARY )
 	{
-		handler( exc );
-		if ( *inst.mStackBottom != CANARY )
-		{
-			ERR( "signal stack overrun\n" );
-			exit( 3 );
-		}
-	}
-	else
-	{
-		ERR( "unexpected signal %d\n", sig );
+		ERR( "signal stack overrun\n" );
 		exit( 3 );
 	}
 
