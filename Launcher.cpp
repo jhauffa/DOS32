@@ -20,17 +20,18 @@ int main( int argc, char *argv[], char *envp[] )
 	}
 
 	int result = 0;
+	Image *img = NULL;
 	try
 	{
 		ExecutionEnvironment env( argc, argv, envp );
-		Image *img = ImageFactory::create( std::string( argv[1] ), MAX_HEAP_SIZE );
+		img = ImageFactory::create( std::string( argv[1] ), MAX_HEAP_SIZE );
 		result = env.run( img );
-		delete img;
 	}
 	catch ( const Exception &ex )
 	{
 		fprintf( stderr, "%s\n", ex.getErrorMessage().c_str() );
 		result = 2;
 	}
+	delete img;
 	return result;
 }
