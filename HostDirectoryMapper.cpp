@@ -1,6 +1,7 @@
 
-#include "HostDirectoryMapper.h"
+#include "os/OS.h"
 #include "DOSException.h"
+#include "HostDirectoryMapper.h"
 
 
 HostDirectoryMapper::HostDirectoryMapper( const std::string &baseDirName ) :
@@ -10,7 +11,11 @@ HostDirectoryMapper::HostDirectoryMapper( const std::string &baseDirName ) :
 
 void HostDirectoryMapper::setCurrentPath( const std::string &pathName )
 {
-	// XXX: throw exception if path does not exist
+	const Path *hostPath = OS::createPath( mBaseDirName, pathName );
+	bool exists = hostPath->exists();
+	delete hostPath;
+	if ( !exists )
+		throw DOSException( DOSException::ERROR_PATH_NOT_FOUND );
 	mCurPathName = pathName;
 }
 

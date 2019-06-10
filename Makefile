@@ -3,7 +3,7 @@ OBJS_DOS32 = ImageFactory.o ImageLoaderException.o LEImage.o ExecutionEnvironmen
 	DOS.o DOSExtender.o DPMI.o DescriptorTable.o Launcher.o VolumeManager.o \
 	DOSException.o HostDirectoryMapper.o \
 	os/Context.o os/ExceptionInfo.o \
-	os/unix/UnixMemMap.o os/unix/UnixException.o os/unix/UnixThread.o \
+	os/unix/UnixMemMap.o os/unix/UnixException.o os/unix/UnixThread.o os/unix/UnixPath.o \
 	os/unix/DarwinContext.o os/unix/DarwinExceptionManager.o \
 	os/unix/DarwinExceptionInfo.o os/unix/DarwinLDT.o os/unix/UnixDateTime.o os/unix/OS.o
 HEADERS_DOS32 = *.h os/*.h os/unix/*.h

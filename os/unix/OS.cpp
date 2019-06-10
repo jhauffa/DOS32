@@ -5,6 +5,7 @@
 #include "os/unix/DarwinExceptionManager.h"
 #include "os/unix/DarwinLDT.h"
 #include "os/unix/UnixDateTime.h"
+#include "os/unix/UnixPath.h"
 #include "os/OS.h"
 
 
@@ -49,4 +50,9 @@ LDT *OS::createLDT()
 Time *OS::createTime()
 {
 	return new UnixTime();
+}
+
+Path *OS::createPath( const std::string &hostPrefix, const std::string &dosSuffix )
+{
+	return new UnixPath( hostPrefix, dosSuffix );
 }

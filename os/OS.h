@@ -10,6 +10,7 @@
 #include "os/ExceptionManager.h"
 #include "os/LDT.h"
 #include "os/DateTime.h"
+#include "os/Path.h"
 
 
 class OS
@@ -28,6 +29,9 @@ class OS
 		static LDT *createLDT();
 
 		static Time *createTime();
+
+		static Path *createPath( const std::string &hostPrefix,
+			const std::string &dosSuffix );
 };
 
 #endif  // __DOS32_OS_OS_H__

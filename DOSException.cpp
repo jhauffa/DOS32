@@ -19,6 +19,9 @@ std::string DOSException::getErrorMessage() const
 		case ERROR_FUNCTION_NOT_SUPPORTED:
 			msg += "function not supported";
 			break;
+		case ERROR_PATH_NOT_FOUND:
+			msg += "directory does not exist";
+			break;
 		case ERROR_OUT_OF_HANDLES:
 			msg += "too many open files";
 			break;
