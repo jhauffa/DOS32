@@ -167,7 +167,7 @@ bool DOS::handleInterrupt( uint8_t idx, Context &ctx, void *lowMemBase )
 		case 0x3B:
 			TRACE( "set current directory\n" );
 			setCurrentDirectory( (char *) translateAddress( lowMemBase, ctx.getDS(),
-					ctx.getDX() ), ctx) ;
+					ctx.getDX() ), ctx );
 			break;
 		case 0x3D:
 			TRACE( "open\n" );

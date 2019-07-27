@@ -35,6 +35,7 @@ class DarwinExceptionManager : public ExceptionManager,
 		static void emitLoadAX( uint8_t *&buf, uint16_t value );
 		static void emitLoadSegReg( uint8_t *&buf, uint8_t segCode );
 		static void emitFarJump( uint8_t *&buf, uint16_t sel, uint32_t addr );
+		static void emitNearJump( uint8_t *&buf, uint32_t addr );
 		static void signalHandler( int sig, siginfo_t *info, void *data );
 };
 

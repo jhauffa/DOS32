@@ -100,6 +100,15 @@ void DarwinExceptionManager::emitFarJump( uint8_t *&buf, uint16_t sel, uint32_t 
 	buf += 2;
 }
 
+void DarwinExceptionManager::emitNearJump( uint8_t *&buf, uint32_t addr )
+{
+	// JMP addr (relative to EIP after current instruction)
+	*buf++ = 0xe9;
+	*reinterpret_cast<uint32_t *>( buf ) = addr -
+		( reinterpret_cast<uint32_t>( buf ) + 4 );
+	buf += 4;
+}
+
 void DarwinExceptionManager::signalHandler( int sig, siginfo_t *info, void *data )
 {
 	DarwinExceptionInfo exc( sig, info, data );
@@ -139,8 +148,8 @@ void DarwinExceptionManager::signalHandler( int sig, siginfo_t *info, void *data
 	/* MacOS preserves the content of the segment registers on context switches, but
 	   resets them to default values on return from a signal handler (see
 	   set_thread_state32 in osfmk/i386/pcb.c of the XNU source code). Since loading a
-	   segment register is expensive, we build a custom piece of code that restores all
-	   segment registers that have been modified by the DOS program. */
+	   segment register is expensive, we build a custom piece of code that specifically
+	   restores those segment registers that have been modified by the DOS program. */
 	uint8_t *bufBase = reinterpret_cast<uint8_t *>( mRestoreSegRegsCode->getPtr() );
 	uint8_t *buf = bufBase;
 	if ( ctx.getSS() != mOSDataSel )
@@ -166,8 +175,10 @@ void DarwinExceptionManager::signalHandler( int sig, siginfo_t *info, void *data
 	}
 	if ( buf > bufBase )
 		emitLoadAX( buf, ctx.getAX() );
-	if ( ( buf > bufBase ) || ( ctx.getCS() != mOSCodeSel ) )
+	if ( ctx.getCS() != mOSCodeSel )
 		emitFarJump( buf, ctx.getCS(), ctx.getEIP() );
+	else if ( buf > bufBase )
+		emitNearJump( buf, ctx.getEIP() );
 	if ( buf > bufBase )
 		ctx.setEIP( reinterpret_cast<uint32_t>( bufBase ) );
 
