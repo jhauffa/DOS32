@@ -7,10 +7,10 @@
 #include <string>
 
 
-class File
+class GuestFile
 {
 	public:
-		virtual ~File() {}
+		virtual ~GuestFile() {}
 
 		enum SeekMode
 		{
@@ -24,7 +24,7 @@ class File
 		virtual uint16_t getDeviceFlags() const = 0;
 };
 
-class ConsoleFile : public File
+class ConsoleFile : public GuestFile
 {
 	public:
 		ConsoleFile( FILE *stream );
@@ -55,7 +55,7 @@ class Volume
 		virtual void setCurrentPath( const std::string &pathName ) = 0;
 		virtual const std::string &getCurrentPath() const = 0;
 
-		virtual File *createFile( const std::string &fileName ) = 0;
+		virtual GuestFile *createFile( const std::string &fileName ) = 0;
 };
 
 class VolumeManager
@@ -71,7 +71,7 @@ class VolumeManager
 		Volume &getCurrentVolume();
 		Volume &getVolume( uint8_t drive );
 
-		File *createConsole( FILE *stream );
+		GuestFile *createConsole( FILE *stream );
 
 	private:
 		static const uint8_t MAX_DRIVE = 25;

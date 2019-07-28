@@ -1,7 +1,6 @@
 
 #include <sys/mman.h>
 #include <unistd.h>
-#include <fcntl.h>
 #include <cerrno>
 
 #include "Debug.h"
@@ -9,25 +8,17 @@
 #include "os/unix/UnixMemMap.h"
 
 
-UnixMemMap::UnixMemMap( const std::string &fileName, int access )
+UnixMemMap::UnixMemMap( const File &file, int access )
 {
-	mFd = open( fileName.c_str(), O_RDONLY );
-	if ( mFd < 0 )
-		throw UnixException();
-	mSize = lseek( mFd, 0, SEEK_END );
-
+	mSize = file.getSize();
 	mProtFlags = convertFlags( access );
-	mPtr = mmap( NULL, mSize, mProtFlags, MAP_PRIVATE, mFd, 0 );
+	mPtr = mmap( NULL, mSize, mProtFlags, MAP_PRIVATE, file.getHandle(), 0 );
 	if ( mPtr == MAP_FAILED )
-	{
-		int error = errno;
-		close( mFd );
-		throw UnixException( error );
-	}
+		throw UnixException();
 	mEnd = (uint8_t *) mPtr + mSize;
 }
 
-UnixMemMap::UnixMemMap( MemSize size, int access ) : mSize( size ), mFd( -1 )
+UnixMemMap::UnixMemMap( MemSize size, int access ) : mSize( size )
 {
 	mProtFlags = convertFlags( access );
 	mPtr = mmap( NULL, mSize, mProtFlags, MAP_ANON | MAP_PRIVATE, 0, 0 );
@@ -42,11 +33,9 @@ UnixMemMap::~UnixMemMap()
 	     it != mSubMappings.end(); ++it)
 		munmap( it->addr, it->length );
 	munmap( mPtr, mSize );
-	if ( mFd != -1 )
-		close( mFd );
 }
 
-void UnixMemMap::map( const MemMap &fileMap, MemSize regionOffset, MemSize fileOffset,
+void UnixMemMap::map( const File &file, MemSize regionOffset, MemSize fileOffset,
 	MemSize length )
 {
 	assert ( isInRange( regionOffset ) && isInRange( regionOffset + length - 1 ) );
@@ -56,7 +45,7 @@ void UnixMemMap::map( const MemMap &fileMap, MemSize regionOffset, MemSize fileO
 	if ( ( ( (uintptr_t) addr & 0xFFF ) == 0 ) && ( ( fileOffset & 0xFFF ) == 0 ) )
 	{
 		void *ptr = mmap( addr, length, mProtFlags, MAP_FIXED | MAP_PRIVATE,
-			(int) fileMap.getFileHandle(), fileOffset );
+			file.getHandle(), fileOffset );
 		if ( ptr == (void *) -1 )
 			throw UnixException();
 
@@ -68,7 +57,7 @@ void UnixMemMap::map( const MemMap &fileMap, MemSize regionOffset, MemSize fileO
 	else
 	{
 		// target address or file offset not page aligned, read directly
-		int fd = dup( (int) fileMap.getFileHandle() );
+		int fd = dup( file.getHandle() );
 		lseek( fd, fileOffset, SEEK_SET );
 		mprotect( addr, length, PROT_READ | PROT_WRITE );
 		ssize_t bytesRead = read( fd, addr, length );
@@ -101,11 +90,6 @@ bool UnixMemMap::isInRange( void *ptr ) const
 bool UnixMemMap::isInRange( MemSize offset ) const
 {
 	return ( offset < mSize );
-}
-
-void *UnixMemMap::getFileHandle() const
-{
-	return (void *) mFd;
 }
 
 int UnixMemMap::convertFlags( int access )

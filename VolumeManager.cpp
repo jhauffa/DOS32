@@ -79,7 +79,7 @@ Volume &VolumeManager::getVolume( uint8_t drive )
 	return *mVolumes[drive];
 }
 
-File *VolumeManager::createConsole( FILE *stream )
+GuestFile *VolumeManager::createConsole( FILE *stream )
 {
 	return new ConsoleFile( stream );
 }

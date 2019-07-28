@@ -23,7 +23,7 @@ static ImageFactory creator( createLEImage );
 
 
 LEImage::LEImage( const std::string &fileName, uint32_t maxHeapSize ) :
-	Image( fileName, maxHeapSize ), mEntryPoint( NULL ),
+	Image( fileName, maxHeapSize ), mFile( NULL ), mEntryPoint( NULL ),
 	mStackPointer( NULL ), mHeapEnd( NULL )
 {
 	ExecutionEnvironment &env = ExecutionEnvironment::getInstance();
@@ -36,6 +36,7 @@ LEImage::~LEImage()
 	for ( std::vector<MemMap *>::iterator it = mObjectMappings.begin();
 		  it != mObjectMappings.end(); ++it )
 		delete *it;
+	delete mFile;
 }
 
 void LEImage::load()
@@ -44,7 +45,8 @@ void LEImage::load()
 	MemMap *mem;
 	try
 	{
-		mem = OS::createMemMap( mFileName, MemMap::ACC_READ | MemMap::ACC_WRITE );
+		mFile = OS::createFile( mFileName, File::ACC_READ );
+		mem = OS::createMemMap( *mFile, MemMap::ACC_READ | MemMap::ACC_WRITE );
 	}
 	catch ( const OSException &ex )
 	{
@@ -236,7 +238,7 @@ void LEImage::mapObject( const MemMap &mem, const LEHeader *header,
 			uint32_t objectOffset = startIdx * header->pageSize;
 			TRACE( "mapping %u bytes from file offset 0x%x to object offset 0x%x\n",
 				length, startOffset, objectOffset );
-			objectMapping->map( mem, objectOffset, startOffset, length );
+			objectMapping->map( *mFile, objectOffset, startOffset, length );
 			startOffset = endOffset = 0;
 		}
 		else

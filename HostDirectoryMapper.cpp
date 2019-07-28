@@ -24,7 +24,7 @@ const std::string &HostDirectoryMapper::getCurrentPath() const
 	return mCurPathName;
 }
 
-File *HostDirectoryMapper::createFile( const std::string &fileName )
+GuestFile *HostDirectoryMapper::createFile( const std::string &fileName )
 {
 	throw DOSException( DOSException::ERROR_FUNCTION_NOT_SUPPORTED );
 }

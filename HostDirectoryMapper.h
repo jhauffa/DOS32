@@ -14,7 +14,7 @@ class HostDirectoryMapper : public Volume
 		virtual void setCurrentPath( const std::string &pathName );
 		virtual const std::string &getCurrentPath() const;
 
-		virtual File *createFile( const std::string &fileName );
+		virtual GuestFile *createFile( const std::string &fileName );
 
 	private:
 		const std::string &mBaseDirName;
