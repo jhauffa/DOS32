@@ -243,11 +243,11 @@ uint8_t DOS::extractDrive( const std::string &pathName )
 	return mVolumeManager.getCurrentDrive();
 }
 
-GuestFile *DOS::getOpenFile( uint16_t handle )
+File *DOS::getOpenFile( uint16_t handle )
 {
 	if ( handle >= mOpenFiles.size() )
 		throw DOSException( DOSException::ERROR_INVALID_HANDLE );
-	GuestFile *f = mOpenFiles[handle];
+	File *f = mOpenFiles[handle];
 	if ( !f )
 		throw DOSException( DOSException::ERROR_INVALID_HANDLE );
 	return f;
@@ -291,8 +291,7 @@ void DOS::fileOpen( char *path, host::Context &ctx )
 	TRACE( "path = %s\n", path );
 	try
 	{
-		GuestFile *f =
-			mVolumeManager.getVolume( extractDrive( path ) ).createFile( path );
+		File *f = mVolumeManager.getVolume( extractDrive( path ) ).createFile( path );
 		uint16_t handle = mOpenFiles.size();
 		if ( handle >= NUM_FILE_HANDLES )
 			throw DOSException( DOSException::ERROR_OUT_OF_HANDLES );
@@ -309,7 +308,7 @@ void DOS::fileWrite( char *data, host::Context &ctx )
 {
 	try
 	{
-		GuestFile *f = getOpenFile( ctx.getBX() );
+		File *f = getOpenFile( ctx.getBX() );
 		// TODO: does DOS/4GW use ECX/EAX?
 		ctx.setAX( f->write( data, ctx.getCX() ) & 0xFFFF );
 	}
@@ -323,9 +322,9 @@ void DOS::fileSeek( host::Context &ctx )
 {
 	try
 	{
-		GuestFile *f = getOpenFile( ctx.getBX() );
+		File *f = getOpenFile( ctx.getBX() );
 		size_t newPos = f->seek( ( ctx.getCX() << 16 ) | ctx.getDX(),
-			(GuestFile::SeekMode) ctx.getAL() );
+			(File::SeekMode) ctx.getAL() );
 		ctx.setDX( ( newPos >> 16 ) & 0xFFFF );
 		ctx.setAX( newPos & 0xFFFF );
 	}
@@ -339,7 +338,7 @@ void DOS::fileGetDeviceFlags( host::Context &ctx )
 {
 	try
 	{
-		GuestFile *f = getOpenFile( ctx.getBX() );
+		File *f = getOpenFile( ctx.getBX() );
 		ctx.setDX( f->getDeviceFlags() );
 	}
 	catch ( const DOSException &ex )

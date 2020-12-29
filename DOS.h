@@ -66,13 +66,13 @@ class DOS
 		char *mDta;
 		DOSException mLastError;
 		VolumeManager mVolumeManager;
-		std::vector<GuestFile *> mOpenFiles;
+		std::vector<File *> mOpenFiles;
 
 		void initPsp( int argc, char *argv[] );
 		void initEnvironment( char *envp[], const char *appName );
 		void convertDOSException( const DOSException &ex, host::Context &ctx );
 		uint8_t extractDrive( const std::string &pathName );
-		GuestFile *getOpenFile( uint16_t handle );
+		File *getOpenFile( uint16_t handle );
 
 		static const uint8_t NUM_FILE_HANDLES = 20;
 
