@@ -5,6 +5,8 @@
 #include "os/LDT.h"
 
 
+namespace host {
+
 class DarwinLDT : public LDT
 {
 	public:
@@ -17,6 +19,8 @@ class DarwinLDT : public LDT
 	private:
 		static void setDescLimit( void *desc, uint32_t limit );
 };
+
+}
 
 
 #endif  // __DOS32_OS_UNIX_DARWIN_LDT_H__

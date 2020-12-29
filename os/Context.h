@@ -5,6 +5,8 @@
 #include <cstdint>
 
 
+namespace host {
+
 class Context
 {
 	public:
@@ -103,6 +105,8 @@ class Context
 
 		virtual void dump() const;
 };
+
+}
 
 
 #endif  // __DOS32_CONTEXT_H__

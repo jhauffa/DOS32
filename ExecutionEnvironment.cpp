@@ -42,14 +42,14 @@ DescriptorTable &ExecutionEnvironment::getDescriptorTable()
 
 int ExecutionEnvironment::run( Image *img )
 {
-	Thread &thr = *OS::createThread( appThreadProc, img );
+	host::Thread &thr = *host::OS::createThread( appThreadProc, img );
 	thr.run();
 	return thr.join();
 }
 
 int ExecutionEnvironment::appThreadProc( void *data )
 {
-	ExceptionManager &mgr = OS::getExceptionManager();
+	host::ExceptionManager &mgr = host::OS::getExceptionManager();
 	mgr.setMemoryExceptionHandler( memoryExceptionHandler );
 	mgr.setConsoleInterruptHandler( consoleInterruptHandler );
 
@@ -58,9 +58,9 @@ int ExecutionEnvironment::appThreadProc( void *data )
 	return 0;  // should not happen
 }
 
-void ExecutionEnvironment::memoryExceptionHandler( ExceptionInfo &info )
+void ExecutionEnvironment::memoryExceptionHandler( host::ExceptionInfo &info )
 {
-	Context &ctx = info.getMutableContext();
+	host::Context &ctx = info.getMutableContext();
 	uint8_t *eip = (uint8_t *) ctx.getEIP();
 	int instrSize = 0;
 	bool canResume = true;
@@ -107,9 +107,9 @@ void ExecutionEnvironment::memoryExceptionHandler( ExceptionInfo &info )
 	}
 }
 
-void ExecutionEnvironment::consoleInterruptHandler( ExceptionInfo &info )
+void ExecutionEnvironment::consoleInterruptHandler( host::ExceptionInfo &info )
 {
-	const Context &ctx = info.getContext();
+	const host::Context &ctx = info.getContext();
 	TRACE( "\nlast EIP = 0x%x\n", ctx.getEIP() );
 	exit( 3 );
 }

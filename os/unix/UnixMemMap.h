@@ -9,6 +9,8 @@
 #include "os/MemMap.h"
 
 
+namespace host {
+
 class UnixMemMap : public MemMap
 {
 	public:
@@ -40,6 +42,8 @@ class UnixMemMap : public MemMap
 
 		static int convertFlags( int access );
 };
+
+}
 
 
 #endif  // __DOS32_OS_UNIX_MEMMAP_H__

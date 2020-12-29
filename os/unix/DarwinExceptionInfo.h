@@ -7,6 +7,8 @@
 #include "os/ExceptionInfo.h"
 
 
+namespace host {
+
 class DarwinExceptionInfo : public ExceptionInfo
 {
 	public:
@@ -24,6 +26,8 @@ class DarwinExceptionInfo : public ExceptionInfo
 		siginfo_t *mInfo;
 		Context *mContext;
 };
+
+}
 
 
 #endif  // __DOS32_OS_UNIX_DARWIN_EXCEPTION_INFO_H__

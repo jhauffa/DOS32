@@ -6,6 +6,8 @@
 #include "os/unix/DarwinExceptionInfo.h"
 #include "os/unix/DarwinExceptionManager.h"
 
+namespace host {
+
 #define CANARY  0xCAF00F00
 
 
@@ -183,4 +185,6 @@ void DarwinExceptionManager::signalHandler( int sig, siginfo_t *info, void *data
 		ctx.setEIP( reinterpret_cast<uint32_t>( bufBase ) );
 
 	mReenterCount--;
+}
+
 }

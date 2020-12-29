@@ -5,12 +5,14 @@
 #include <cstdint>
 #include <vector>
 
-#include "os/OS.h"
 #include "DOSException.h"
 #include "Volume.h"
 
-class Context;
 
+namespace host {
+class Context;
+class Time;
+}
 
 struct PSP
 {
@@ -42,25 +44,25 @@ class DOS
 		DOS( int argc, char *argv[], char *envp[] );
 		~DOS();
 
-		virtual bool handleInterrupt( uint8_t idx, Context &ctx, void *lowMemBase );
+		virtual bool handleInterrupt( uint8_t idx, host::Context &ctx, void *lowMemBase );
 
 		PSP *getPsp() const;
 		char *getEnvironment() const;
 		uint32_t getEnvironmentSize() const;
 
 		void setDTA( char *dta );
-		void setCurrentDirectory( char *path, Context &ctx );
-		void getCurrentDirectory( char *path, Context &ctx );
-		void fileOpen( char *path, Context &ctx );
-		void fileWrite( char *data, Context &ctx );
-		void fileSeek( Context &ctx );
-		void fileGetDeviceFlags( Context &ctx );
+		void setCurrentDirectory( char *path, host::Context &ctx );
+		void getCurrentDirectory( char *path, host::Context &ctx );
+		void fileOpen( char *path, host::Context &ctx );
+		void fileWrite( char *data, host::Context &ctx );
+		void fileSeek( host::Context &ctx );
+		void fileGetDeviceFlags( host::Context &ctx );
 
 	private:
 		PSP *mPsp;
 		char *mEnvironment;
 		uint32_t mEnvironmentSize;
-		Time *mTime;
+		host::Time *mTime;
 		char *mDta;
 		DOSException mLastError;
 		VolumeManager mVolumeManager;
@@ -68,7 +70,7 @@ class DOS
 
 		void initPsp( int argc, char *argv[] );
 		void initEnvironment( char *envp[], const char *appName );
-		void convertDOSException( const DOSException &ex, Context &ctx );
+		void convertDOSException( const DOSException &ex, host::Context &ctx );
 		uint8_t extractDrive( const std::string &pathName );
 		GuestFile *getOpenFile( uint16_t handle );
 

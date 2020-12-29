@@ -8,6 +8,8 @@
 #include "os/unix/UnixFile.h"
 
 
+namespace host {
+
 UnixFile::UnixFile( const std::string &fileName, int access ) : mFd( -1 )
 {
 	int flags = convertFlags( access );
@@ -85,4 +87,6 @@ int UnixFile::convertFlags( int access )
 	if ( access & ACC_CREATE )
 		flags |= O_CREAT;
 	return flags;
+}
+
 }

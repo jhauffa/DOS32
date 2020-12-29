@@ -5,6 +5,8 @@
 #include <cstdint>
 
 
+namespace host {
+
 class LDT
 {
 	public:
@@ -14,6 +16,8 @@ class LDT
 		virtual void freeDesc( uint16_t sel ) = 0;
 		virtual void setLimit( uint16_t sel, uint32_t limit ) = 0;
 };
+
+}
 
 
 #endif  // __DOS32_OS_LDT_H__

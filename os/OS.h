@@ -14,6 +14,8 @@
 #include "os/Path.h"
 
 
+namespace host {
+
 class OS
 {
 	public:
@@ -36,5 +38,8 @@ class OS
 		static Path *createPath( const std::string &hostPrefix,
 			const std::string &dosSuffix );
 };
+
+}
+
 
 #endif  // __DOS32_OS_OS_H__

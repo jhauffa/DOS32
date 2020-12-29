@@ -7,8 +7,7 @@
 #include "LEImage.h"
 
 
-namespace
-{
+namespace {
 
 // register with ImageFactory
 
@@ -33,7 +32,7 @@ LEImage::LEImage( const std::string &fileName, uint32_t maxHeapSize ) :
 
 LEImage::~LEImage()
 {
-	for ( std::vector<MemMap *>::iterator it = mObjectMappings.begin();
+	for ( std::vector<host::MemMap *>::iterator it = mObjectMappings.begin();
 		  it != mObjectMappings.end(); ++it )
 		delete *it;
 	delete mFile;
@@ -42,13 +41,14 @@ LEImage::~LEImage()
 void LEImage::load()
 {
 	TRACE( "LEImage: loading \"%s\"\n", mFileName.c_str() );
-	MemMap *mem;
+	host::MemMap *mem;
 	try
 	{
-		mFile = OS::createFile( mFileName, File::ACC_READ );
-		mem = OS::createMemMap( *mFile, MemMap::ACC_READ | MemMap::ACC_WRITE );
+		mFile = host::OS::createFile( mFileName, host::File::ACC_READ );
+		mem = host::OS::createMemMap( *mFile,
+			host::MemMap::ACC_READ | host::MemMap::ACC_WRITE );
 	}
-	catch ( const OSException &ex )
+	catch ( const host::OSException &ex )
 	{
 		throw ImageLoaderException( ex );
 	}
@@ -96,7 +96,7 @@ void LEImage::load()
 
 		relocate( *mem, header, objectTable, fixupTable, fixupRecordTable );
 	}
-	catch ( const OSException &ex )
+	catch ( const host::OSException &ex )
 	{
 		delete mem;
 		throw ImageLoaderException( ex );
@@ -127,7 +127,7 @@ void *LEImage::getHeapEnd() const
 	return mHeapEnd;
 }
 
-LEHeader *LEImage::findLEHeader( const MemMap &mem ) const
+LEHeader *LEImage::findLEHeader( const host::MemMap &mem ) const
 {
 	uint16_t *ptr = (uint16_t *) mem.getPtr();
 	while ( mem.isInRange( ptr + ( DOS_EXT_TYPE / 2 ) + 1 ) )
@@ -177,7 +177,7 @@ void LEImage::verifyHeader( const LEHeader *header ) const
 		throw ImageLoaderException( ImageLoaderException::IMG_NOT_SUPPORTED );
 }
 
-void LEImage::mapObject( const MemMap &mem, const LEHeader *header,
+void LEImage::mapObject( const host::MemMap &mem, const LEHeader *header,
 	const LEObjectTableEntry *object, const LEPageTableEntry *pageTable, bool isStack )
 {
 	TRACE( "object base = 0x%x, size = %u, flags = 0x%x\n", object->relocBaseAddr,
@@ -203,11 +203,11 @@ void LEImage::mapObject( const MemMap &mem, const LEHeader *header,
 	// Allocate a VM area; ignore permission flags so that code can be patched without
 	// having to modify and restore the read-only state.
 	// TODO: evaluate cost/benefit/feasability of correct page protection
-	MemSize allocSize = roundToPageSize( object->virtualSize, header->pageSize );
+	host::MemSize allocSize = roundToPageSize( object->virtualSize, header->pageSize );
 	if ( isStack )
 		allocSize += mMaxHeapSize;
-	MemMap *objectMapping = OS::createMemMap( allocSize,
-		MemMap::ACC_READ | MemMap::ACC_WRITE | MemMap::ACC_EXEC );
+	host::MemMap *objectMapping = host::OS::createMemMap( allocSize,
+		host::MemMap::ACC_READ | host::MemMap::ACC_WRITE | host::MemMap::ACC_EXEC );
 	TRACE( "new object base = %p\n", objectMapping->getPtr() );
 	mObjectMappings.push_back( objectMapping );
 
@@ -246,7 +246,7 @@ void LEImage::mapObject( const MemMap &mem, const LEHeader *header,
 	}
 }
 
-void LEImage::relocate( const MemMap &mem, const LEHeader *header,
+void LEImage::relocate( const host::MemMap &mem, const LEHeader *header,
 	const LEObjectTableEntry *objectTable, const LEFixupTableEntry *fixupTable,
 	const LEFixupRecord *fixupRecordTable )
 {

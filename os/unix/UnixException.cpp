@@ -5,6 +5,8 @@
 #include "os/unix/UnixException.h"
 
 
+namespace host {
+
 UnixException::UnixException()
 {
 	mError = errno;
@@ -46,4 +48,6 @@ int UnixException::getError() const
 	default:
 		return OS_UNKNOWN_ERROR;
 	}
+}
+
 }

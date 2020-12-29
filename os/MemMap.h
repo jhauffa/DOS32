@@ -4,6 +4,9 @@
 
 #include "os/File.h"
 
+
+namespace host {
+
 typedef unsigned long MemSize;
 
 
@@ -23,6 +26,8 @@ class MemMap
 		virtual bool isInRange( void *ptr ) const = 0;
 		virtual bool isInRange( MemSize offset ) const = 0;
 };
+
+}
 
 
 #endif  // __DOS32_OS_MEMMAP_H__

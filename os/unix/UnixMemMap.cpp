@@ -8,6 +8,8 @@
 #include "os/unix/UnixMemMap.h"
 
 
+namespace host {
+
 UnixMemMap::UnixMemMap( const File &file, int access )
 {
 	mSize = file.getSize();
@@ -104,4 +106,6 @@ int UnixMemMap::convertFlags( int access )
 	if ( prot == 0 )
 		prot = PROT_NONE;
 	return prot;
+}
+
 }

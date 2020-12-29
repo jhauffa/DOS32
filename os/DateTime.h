@@ -3,6 +3,8 @@
 #define __DOS32_OS_DATE_TIME_H__
 
 
+namespace host {
+
 class Time
 {
 	public:
@@ -17,6 +19,8 @@ class Time
 		virtual unsigned int getSeconds() const = 0;
 		virtual unsigned int getMilliSeconds() const = 0;
 };
+
+}
 
 
 #endif  // __DOS32_OS_DATE_TIME_H__

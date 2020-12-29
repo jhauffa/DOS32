@@ -4,9 +4,12 @@
 
 #include <cstdint>
 
-#include "os/Context.h"
 #include "InterruptHandler.h"
 
+
+namespace host {
+class Context;
+}
 
 class DOS;
 class Image;
@@ -19,7 +22,7 @@ class DOSExtender : public InterruptHandler
 
 		void run( Image *img );
 
-		virtual bool handleInterrupt( uint8_t idx, Context &ctx );
+		virtual bool handleInterrupt( uint8_t idx, host::Context &ctx );
 
 	private:
 		ExecutionEnvironment *mEnv;
@@ -27,7 +30,7 @@ class DOSExtender : public InterruptHandler
 		Image *mImage;
 		uint16_t mPspSel;
 
-		bool handleDOS4GW( Context &ctx );
+		bool handleDOS4GW( host::Context &ctx );
 };
 
 

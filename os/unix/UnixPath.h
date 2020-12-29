@@ -7,6 +7,8 @@
 #include "os/Path.h"
 
 
+namespace host {
+
 class UnixPath : public Path
 {
 	public:
@@ -18,6 +20,8 @@ class UnixPath : public Path
 	private:
 		std::string mHostPath;
 };
+
+}
 
 
 #endif  // __DOS32_OS_UNIX_PATH_H__

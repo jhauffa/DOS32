@@ -2,6 +2,8 @@
 #ifndef __DOS32_OS_EXCEPTION_INFO_H__
 #define __DOS32_OS_EXCEPTION_INFO_H__
 
+namespace host {
+
 class Context;
 
 
@@ -16,6 +18,8 @@ class ExceptionInfo
 
 		virtual void dump() const;
 };
+
+}
 
 
 #endif  // __DOS32_OS_EXCEPTION_INFO_H__

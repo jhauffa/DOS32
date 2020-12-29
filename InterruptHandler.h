@@ -4,13 +4,15 @@
 
 #include <cstdint>
 
+namespace host {
 class Context;
+}
 
 
 class InterruptHandler
 {
 	public:
-		virtual bool handleInterrupt( uint8_t idx, Context &ctx ) = 0;
+		virtual bool handleInterrupt( uint8_t idx, host::Context &ctx ) = 0;
 };
 
 

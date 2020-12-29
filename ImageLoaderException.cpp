@@ -23,7 +23,7 @@ ImageLoaderException::ImageLoaderException( LoaderError error ) : mError( error 
 {
 }
 
-ImageLoaderException::ImageLoaderException( const OSException &ex )
+ImageLoaderException::ImageLoaderException( const host::OSException &ex )
 {
 	mError = osErrorToLoaderError( ex.getError() );
 }
@@ -43,15 +43,15 @@ ImageLoaderException::LoaderError ImageLoaderException::osErrorToLoaderError( in
 {
 	switch ( error )
 	{
-		case OSException::OS_NO_ERROR:
+		case host::OSException::OS_NO_ERROR:
 			return IMG_NO_ERROR;
-		case OSException::OS_ACCESS_DENIED:
+		case host::OSException::OS_ACCESS_DENIED:
 			return IMG_ACCESS_DENIED;
-		case OSException::OS_IO_ERROR:
+		case host::OSException::OS_IO_ERROR:
 			return IMG_IO_ERROR;
-		case OSException::OS_FILE_NOT_FOUND:
+		case host::OSException::OS_FILE_NOT_FOUND:
 			return IMG_FILE_NOT_FOUND;
-		case OSException::OS_OUT_OF_MEMORY:
+		case host::OSException::OS_OUT_OF_MEMORY:
 			return IMG_OUT_OF_MEMORY;
 		default:
 			return IMG_INTERNAL_ERROR;

@@ -2,6 +2,8 @@
 #include "os/unix/DarwinContext.h"
 
 
+namespace host {
+
 DarwinContext::DarwinContext( void *ctx )
 {
 	mContext = ( (ucontext_t *) ctx )->uc_mcontext;
@@ -367,4 +369,6 @@ uint16_t DarwinContext::getGS() const
 void DarwinContext::setGS( uint16_t value )
 {
 	mContext->__ss.__gs = ( mContext->__ss.__gs & 0xFFFF0000 ) | value;
+}
+
 }

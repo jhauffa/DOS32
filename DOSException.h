@@ -2,9 +2,9 @@
 #ifndef __DOS32_DOS_EXCEPTION_H__
 #define __DOS32_DOS_EXCEPTION_H__
 
-#include "Exception.h"
-
 #include <cstdint>
+
+#include "Exception.h"
 
 
 class DOSException

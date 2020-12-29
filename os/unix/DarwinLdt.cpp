@@ -7,6 +7,8 @@
 #include "os/unix/DarwinLDT.h"
 
 
+namespace host {
+
 uint16_t DarwinLDT::allocDesc( uint32_t base, uint32_t limit )
 {
 	data_desc_t desc;
@@ -57,4 +59,6 @@ void DarwinLDT::setDescLimit( void *desc, uint32_t limit )
 		d->granular = 0;
 	d->limit00 = limit & 0xFFFF;
 	d->limit16 = ( limit >> 16 ) & 0x0F;
+}
+
 }

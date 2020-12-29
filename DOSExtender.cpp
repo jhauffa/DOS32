@@ -1,4 +1,5 @@
 
+#include "os/Context.h"
 #include "Debug.h"
 #include "ExecutionEnvironment.h"
 #include "Image.h"
@@ -32,7 +33,7 @@ void DOSExtender::run( Image *img )
 	               "jmp *%2\n\t" : : "a" (mPspSel), "r" (stack), "m" (entry) );
 }
 
-bool DOSExtender::handleInterrupt( uint8_t idx, Context &ctx )
+bool DOSExtender::handleInterrupt( uint8_t idx, host::Context &ctx )
 {
 	/* Most DOS extenders hook INT 0x21 to override a number of functions, particularly
 	   memory management functions and functions that take memory addresses as parameters.
@@ -113,7 +114,7 @@ bool DOSExtender::handleInterrupt( uint8_t idx, Context &ctx )
 	return canResume;
 }
 
-bool DOSExtender::handleDOS4GW( Context &ctx )
+bool DOSExtender::handleDOS4GW( host::Context &ctx )
 {
 	uint8_t functionIdx = ctx.getDH();
 	TRACE( ", function 0x%02x: ", functionIdx );

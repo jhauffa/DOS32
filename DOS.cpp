@@ -2,6 +2,7 @@
 #include <cstring>
 #include <cctype>
 
+#include "os/OS.h"
 #include "Debug.h"
 #include "DOS.h"
 
@@ -9,7 +10,7 @@
 DOS::DOS( int argc, char *argv[], char *envp[] ) :
 	mLastError( DOSException::ERROR_NO_ERROR ), mVolumeManager()
 {
-	mTime = OS::createTime();
+	mTime = host::OS::createTime();
 
 	// create standard file handles
 	mOpenFiles.reserve( NUM_FILE_HANDLES );
@@ -101,7 +102,7 @@ void *DOS::translateAddress( void *base, uint16_t segment, uint16_t offset )
 	return ((char *) base) + ((segment << 4) + offset);
 }
 
-bool DOS::handleInterrupt( uint8_t idx, Context &ctx, void *lowMemBase )
+bool DOS::handleInterrupt( uint8_t idx, host::Context &ctx, void *lowMemBase )
 {
 	// called from DOSExtender::handleInterrupt
 	assert( idx == 0x21 );
@@ -200,7 +201,7 @@ bool DOS::handleInterrupt( uint8_t idx, Context &ctx, void *lowMemBase )
 			break;
 		case 0x4C:
 			TRACE( "exit, return code = %u\n", ctx.getAL() );
-			OS::exitThread( ctx.getAL() );
+			host::OS::exitThread( ctx.getAL() );
 			break;
 		case 0x59:
 			TRACE( "get extended error information\n" );
@@ -228,7 +229,7 @@ void DOS::setDTA( char *dta )
 	mDta = dta;
 }
 
-void DOS::convertDOSException( const DOSException &ex, Context &ctx )
+void DOS::convertDOSException( const DOSException &ex, host::Context &ctx )
 {
 	mLastError = ex;
 	ctx.setCF( true );
@@ -252,7 +253,7 @@ GuestFile *DOS::getOpenFile( uint16_t handle )
 	return f;
 }
 
-void DOS::setCurrentDirectory( char *path, Context &ctx )
+void DOS::setCurrentDirectory( char *path, host::Context &ctx )
 {
 	TRACE( "path = %s\n", path );
 	try
@@ -265,7 +266,7 @@ void DOS::setCurrentDirectory( char *path, Context &ctx )
 	}
 }
 
-void DOS::getCurrentDirectory( char *path, Context &ctx )
+void DOS::getCurrentDirectory( char *path, host::Context &ctx )
 {
 	try
 	{
@@ -285,7 +286,7 @@ void DOS::getCurrentDirectory( char *path, Context &ctx )
 	}
 }
 
-void DOS::fileOpen( char *path, Context &ctx )
+void DOS::fileOpen( char *path, host::Context &ctx )
 {
 	TRACE( "path = %s\n", path );
 	try
@@ -304,7 +305,7 @@ void DOS::fileOpen( char *path, Context &ctx )
 	}
 }
 
-void DOS::fileWrite( char *data, Context &ctx )
+void DOS::fileWrite( char *data, host::Context &ctx )
 {
 	try
 	{
@@ -318,7 +319,7 @@ void DOS::fileWrite( char *data, Context &ctx )
 	}
 }
 
-void DOS::fileSeek( Context &ctx )
+void DOS::fileSeek( host::Context &ctx )
 {
 	try
 	{
@@ -334,7 +335,7 @@ void DOS::fileSeek( Context &ctx )
 	}
 }
 
-void DOS::fileGetDeviceFlags( Context &ctx )
+void DOS::fileGetDeviceFlags( host::Context &ctx )
 {
 	try
 	{

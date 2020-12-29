@@ -4,6 +4,8 @@
 #include "os/unix/UnixPath.h"
 
 
+namespace host {
+
 UnixPath::UnixPath( const std::string &hostPrefix, const std::string &dosSuffix ) :
 	mHostPath( hostPrefix )
 {
@@ -16,4 +18,6 @@ UnixPath::UnixPath( const std::string &hostPrefix, const std::string &dosSuffix 
 bool UnixPath::exists() const
 {
 	return ( access( mHostPath.c_str(), F_OK ) == 0 );
+}
+
 }

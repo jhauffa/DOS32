@@ -123,7 +123,10 @@ struct LEFixupRecord
 } __attribute__ ((packed));
 
 
+namespace host {
 class MemMap;
+class File;
+}
 
 class LEImage : public Image
 {
@@ -138,19 +141,19 @@ class LEImage : public Image
 		virtual void *getHeapEnd() const;
 
 	private:
-		const File *mFile;
+		const host::File *mFile;
 		void *mEntryPoint;
 		void *mStackPointer;
 		void *mHeapEnd;
-		std::vector<MemMap *> mObjectMappings;
+		std::vector<host::MemMap *> mObjectMappings;
 		uint16_t mCodeSel;
 
-		LEHeader *findLEHeader( const MemMap &mem ) const;
+		LEHeader *findLEHeader( const host::MemMap &mem ) const;
 		void verifyHeader( const LEHeader *header ) const;
-		void mapObject( const MemMap &mem, const LEHeader *header,
+		void mapObject( const host::MemMap &mem, const LEHeader *header,
 			const LEObjectTableEntry *object, const LEPageTableEntry *pageTable,
 			bool isStack );
-		void relocate( const MemMap &mem, const LEHeader *header,
+		void relocate( const host::MemMap &mem, const LEHeader *header,
 			const LEObjectTableEntry *objectTable, const LEFixupTableEntry *fixupTable,
 			const LEFixupRecord *fixupRecordTable );
 		int processRelocationRecord( int objectIdx, uint32_t objectOffset,

@@ -7,6 +7,8 @@
 #include "os/File.h"
 
 
+namespace host {
+
 class UnixFile : public File
 {
 	public:
@@ -26,6 +28,8 @@ class UnixFile : public File
 
 		int convertFlags( int access );
 };
+
+}
 
 
 #endif  // __DOS32_OS_UNIX_FILE_H__

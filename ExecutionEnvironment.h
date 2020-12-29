@@ -9,9 +9,11 @@
 #include "DescriptorTable.h"
 
 
-class Image;
-class Context;
+namespace host {
 class ExceptionInfo;
+}
+
+class Image;
 class DOS;
 class DOSExtender;
 class DPMI;
@@ -39,8 +41,8 @@ class ExecutionEnvironment : public Singleton<ExecutionEnvironment>
 		DPMI *mDPMI;
 
 		static int appThreadProc( void *data );
-		static void memoryExceptionHandler( ExceptionInfo &info );
-		static void consoleInterruptHandler( ExceptionInfo &info );
+		static void memoryExceptionHandler( host::ExceptionInfo &info );
+		static void consoleInterruptHandler( host::ExceptionInfo &info );
 
 		static int decodePrefix( uint8_t *data );
 };

@@ -7,6 +7,8 @@
 #include "os/Context.h"
 
 
+namespace host {
+
 class DarwinContext : public Context
 {
 	public:
@@ -109,6 +111,8 @@ class DarwinContext : public Context
 
 		mcontext_t mContext;
 };
+
+}
 
 
 #endif  // __DOS32_OS_UNIX_DARWIN_CONTEXT_H__

@@ -5,6 +5,8 @@
 #include "Exception.h"
 
 
+namespace host {
+
 class OSException : public Exception
 {
 	public:
@@ -16,6 +18,8 @@ class OSException : public Exception
 
 		virtual ~OSException() {}
 };
+
+}
 
 
 #endif  // __DOS32_OS_EXCEPTION_H__

@@ -5,6 +5,8 @@
 #include "os/Context.h"
 
 
+namespace host {
+
 void ExceptionInfo::dump() const
 {
 	const Context &ctx = getContext();
@@ -18,4 +20,6 @@ void ExceptionInfo::dump() const
 			fprintf( stderr, "%02x ", eip[i] );
 		fprintf( stderr, "\n" );
 	}
+}
+
 }

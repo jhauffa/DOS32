@@ -11,7 +11,7 @@ HostDirectoryMapper::HostDirectoryMapper( const std::string &baseDirName ) :
 
 void HostDirectoryMapper::setCurrentPath( const std::string &pathName )
 {
-	const Path *hostPath = OS::createPath( mBaseDirName, pathName );
+	const host::Path *hostPath = host::OS::createPath( mBaseDirName, pathName );
 	bool exists = hostPath->exists();
 	delete hostPath;
 	if ( !exists )

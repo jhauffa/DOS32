@@ -5,6 +5,8 @@
 #include "os/OSException.h"
 
 
+namespace host {
+
 class UnixException : public OSException
 {
 	public:
@@ -18,6 +20,8 @@ class UnixException : public OSException
 	private:
 		int mError;
 };
+
+}
 
 
 #endif  // __DOS32_OS_UNIX_EXCEPTION_H__

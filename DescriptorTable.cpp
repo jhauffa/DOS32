@@ -9,7 +9,7 @@ Descriptor::Descriptor( uint16_t sel ) :
 {
 }
 
-Descriptor::Descriptor( LDT *ldt, uint32_t base, uint32_t limit ) :
+Descriptor::Descriptor( host::LDT *ldt, uint32_t base, uint32_t limit ) :
 	mType( DESC_TYPE_LDT ), mBase( base ), mLimit( limit ), mLDT( ldt )
 {
 	mSel = mLDT->allocDesc( base, limit );
@@ -54,7 +54,7 @@ bool Descriptor::setLimit( uint32_t limit )
 
 DescriptorTable::DescriptorTable()
 {
-	mLDT = OS::createLDT();
+	mLDT = host::OS::createLDT();
 
 	// get selectors provided by OS
 	uint16_t sel;

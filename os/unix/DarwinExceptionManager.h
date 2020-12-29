@@ -6,8 +6,12 @@
 #include <csignal>
 #include <cstdint>
 
-#include "Singleton.h"
 #include "os/ExceptionManager.h"
+
+
+namespace host {
+
+#include "Singleton.h"
 
 
 class UnixMemMap;
@@ -40,6 +44,8 @@ class DarwinExceptionManager : public ExceptionManager,
 };
 
 DEFINE_INSTANCE( DarwinExceptionManager );
+
+}
 
 
 #endif  // __DOS32_OS_UNIX_DARWIN_EXCEPTION_MANAGER__

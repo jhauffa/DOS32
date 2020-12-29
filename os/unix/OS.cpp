@@ -10,6 +10,8 @@
 #include "os/OS.h"
 
 
+namespace host {
+
 DarwinExceptionManager exceptMgr;
 
 
@@ -61,4 +63,6 @@ Time *OS::createTime()
 Path *OS::createPath( const std::string &hostPrefix, const std::string &dosSuffix )
 {
 	return new UnixPath( hostPrefix, dosSuffix );
+}
+
 }

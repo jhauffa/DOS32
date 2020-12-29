@@ -3,6 +3,8 @@
 #include "os/unix/UnixThread.h"
 
 
+namespace host {
+
 typedef void *(*PthreadProc)(void *);
 
 
@@ -29,4 +31,6 @@ int UnixThread::join()
 void UnixThread::exit( int result )
 {
 	pthread_exit( (void *) result );
+}
+
 }

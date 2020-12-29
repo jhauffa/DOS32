@@ -3,6 +3,8 @@
 #define __DOS32_OS_PATH_H__
 
 
+namespace host {
+
 class Path
 {
 	public:
@@ -10,6 +12,8 @@ class Path
 
 		virtual bool exists() const = 0;
 };
+
+}
 
 
 #endif  // __DOS32_OS_PATH_H__

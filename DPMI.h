@@ -23,8 +23,11 @@ struct DpmiMemoryInfo
 } __attribute__ ((packed));
 
 
+namespace host {
 class Context;
 class MemMap;
+}
+
 class ExecutionEnvironment;
 
 class DPMI : public InterruptHandler
@@ -33,7 +36,7 @@ class DPMI : public InterruptHandler
 		DPMI( ExecutionEnvironment *env );
 		~DPMI();
 
-		virtual bool handleInterrupt( uint8_t idx, Context &ctx );
+		virtual bool handleInterrupt( uint8_t idx, host::Context &ctx );
 
 	private:
 		enum Error {
@@ -43,7 +46,7 @@ class DPMI : public InterruptHandler
 		};
 
 		ExecutionEnvironment *mEnv;
-		std::map<uint32_t, MemMap *> mMemoryBlocks;
+		std::map<uint32_t, host::MemMap *> mMemoryBlocks;
 		uint32_t mAllocatedMemory;
 
 		uint32_t allocateMemory( uint32_t size );

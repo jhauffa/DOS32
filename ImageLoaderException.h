@@ -48,7 +48,7 @@ class ImageLoaderException : public Exception
 		};
 
 		ImageLoaderException( LoaderError error );
-		ImageLoaderException( const OSException &ex );
+		ImageLoaderException( const host::OSException &ex );
 		virtual ~ImageLoaderException() {}
 
 		virtual std::string getErrorMessage() const;

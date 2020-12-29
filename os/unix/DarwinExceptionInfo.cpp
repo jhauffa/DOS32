@@ -5,6 +5,8 @@
 #include "os/unix/DarwinExceptionInfo.h"
 
 
+namespace host {
+
 DarwinExceptionInfo::DarwinExceptionInfo( int sig, siginfo_t *info, void *data ) :
 	mSignal( sig ), mInfo( info )
 {
@@ -69,4 +71,6 @@ void DarwinExceptionInfo::dump() const
 	fprintf( stderr, "fault address = %p\n", mInfo->si_addr );
 
 	ExceptionInfo::dump();
+}
+
 }

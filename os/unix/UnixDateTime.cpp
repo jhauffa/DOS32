@@ -5,6 +5,8 @@
 #include "os/unix/UnixDateTime.h"
 
 
+namespace host {
+
 UnixTime::UnixTime() : mOffsetSeconds( 0 ), mOffsetMilliSeconds( 0 )
 {
 }
@@ -56,4 +58,6 @@ unsigned int UnixTime::getSeconds() const
 unsigned int UnixTime::getMilliSeconds() const
 {
 	return mMilliSeconds;
+}
+
 }

@@ -4,6 +4,8 @@
 
 #include <stdint.h>
 
+namespace host {
+
 typedef uint64_t FileSize;
 
 
@@ -22,6 +24,8 @@ class File
 		virtual FileSize write( const void *buf, FileSize length ) = 0;
 		virtual FileSize seek( FileSize offset, SeekMode mode ) = 0;
 };
+
+}
 
 
 #endif  // __DOS32_OS_FILE_H__

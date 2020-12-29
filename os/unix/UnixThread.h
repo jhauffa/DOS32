@@ -7,6 +7,8 @@
 #include "os/Thread.h"
 
 
+namespace host {
+
 class UnixThread : public Thread
 {
 	public:
@@ -23,6 +25,8 @@ class UnixThread : public Thread
 		ThreadProc mProc;
 		void *mData;
 };
+
+}
 
 
 #endif  // __DOS32_OS_UNIX_THREAD_H__

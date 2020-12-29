@@ -20,20 +20,20 @@ DPMI::DPMI( ExecutionEnvironment *env ) : mEnv( env ), mAllocatedMemory( 0 )
 
 DPMI::~DPMI()
 {
-	for ( std::map<uint32_t, MemMap *>::iterator it = mMemoryBlocks.begin();
+	for ( std::map<uint32_t, host::MemMap *>::iterator it = mMemoryBlocks.begin();
 	      it != mMemoryBlocks.end(); ++it )
 		delete it->second;
 }
 
 uint32_t DPMI::allocateMemory( uint32_t size )
 {
-	MemMap *mem;
+	host::MemMap *mem;
 	try
 	{
-		mem = OS::createMemMap( size,
-			MemMap::ACC_READ | MemMap::ACC_WRITE | MemMap::ACC_EXEC );
+		mem = host::OS::createMemMap( size,
+			host::MemMap::ACC_READ | host::MemMap::ACC_WRITE | host::MemMap::ACC_EXEC );
 	}
-	catch ( const OSException &ex )
+	catch ( const host::OSException &ex )
 	{
 		return 0;
 	}
@@ -44,7 +44,7 @@ uint32_t DPMI::allocateMemory( uint32_t size )
 	return addr;
 }
 
-bool DPMI::handleInterrupt( uint8_t idx, Context &ctx )
+bool DPMI::handleInterrupt( uint8_t idx, host::Context &ctx )
 {
 	assert( idx == 0x31 );
 

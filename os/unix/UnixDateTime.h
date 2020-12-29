@@ -7,6 +7,8 @@
 #include "os/DateTime.h"
 
 
+namespace host {
+
 class UnixTime : public Time
 {
 	public:
@@ -27,6 +29,8 @@ class UnixTime : public Time
 		struct tm *mCurrentTime;
 		unsigned int mMilliSeconds;
 };
+
+}
 
 
 #endif  // __DOS32_OS_UNIX_DATE_TIME_H__
