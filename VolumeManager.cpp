@@ -10,7 +10,12 @@ ConsoleFile::ConsoleFile( FILE *stream ) : mStream( stream )
 {
 }
 
-size_t ConsoleFile::write( void *data, size_t size )
+size_t ConsoleFile::read( void *data, size_t size )
+{
+	return fread( data, 1, size, mStream );
+}
+
+size_t ConsoleFile::write( const void *data, size_t size )
 {
 	return fwrite( data, 1, size, mStream );
 }

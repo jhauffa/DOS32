@@ -19,7 +19,8 @@ class File
 			SEEK_MODE_END = 0x02
 		};
 
-		virtual size_t write( void *data, size_t size ) = 0;
+		virtual size_t read( void *data, size_t size ) = 0;
+		virtual size_t write( const void *data, size_t size ) = 0;
 		virtual size_t seek( long offset, int mode ) = 0;
 		virtual uint16_t getDeviceFlags() const = 0;
 };
@@ -30,7 +31,8 @@ class ConsoleFile : public File
 		ConsoleFile( FILE *stream );
 		virtual ~ConsoleFile() {}
 
-		virtual size_t write( void *data, size_t size );
+		virtual size_t read( void *data, size_t size );
+		virtual size_t write( const void *data, size_t size );
 		virtual size_t seek( long offset, int mode );
 		virtual uint16_t getDeviceFlags() const;
 
@@ -41,6 +43,7 @@ class ConsoleFile : public File
 enum DeviceFlagsCharacter
 {
 	HAS_CONTROL_CHANNEL = (1 << 14),
+	NOT_REMOVABLE = (1 << 11),
 	IS_CHARACTER_DEVICE = (1 << 7),
 	EOF_ON_INPUT = (1 << 6),
 	IS_STANDARD_OUTPUT = (1 << 1),

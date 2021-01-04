@@ -73,6 +73,7 @@ bool DOSExtender::handleInterrupt( uint8_t idx, host::Context &ctx )
 			}
 			else
 				ctx.setCF( true );
+			// TODO: should set EAX and EBX in case of error
 			break;
 		}
 		case 0xED:
@@ -93,15 +94,23 @@ bool DOSExtender::handleInterrupt( uint8_t idx, host::Context &ctx )
 			break;
 		case 0x3B:
 			TRACE( "set current directory\n" );
-			mDOS->setCurrentDirectory( (char *) ctx.getEDX(), ctx );
+			mDOS->setCurrentDirectory( (const char *) ctx.getEDX(), ctx );
 			break;
 		case 0x3D:
 			TRACE( "open\n" );
 			mDOS->fileOpen( (char *) ctx.getEDX(), ctx );
 			break;
+		case 0x3E:
+			TRACE( "close\n" );
+			mDOS->fileClose( ctx );
+			break;
+		case 0x3F:
+			TRACE( "read\n" );
+			mDOS->fileRead( (char *) ctx.getEDX(), ctx );
+			break;
 		case 0x40:
 			TRACE( "write\n" );
-			mDOS->fileWrite( (char *) ctx.getEDX(), ctx );
+			mDOS->fileWrite( (const char *) ctx.getEDX(), ctx );
 			break;
 		case 0x47:
 			TRACE( "get current directory\n" );

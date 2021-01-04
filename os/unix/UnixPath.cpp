@@ -20,4 +20,9 @@ bool UnixPath::exists() const
 	return ( access( mHostPath.c_str(), F_OK ) == 0 );
 }
 
+std::string UnixPath::getPathName() const
+{
+	return mHostPath;
+}
+
 }

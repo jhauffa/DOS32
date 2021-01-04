@@ -51,10 +51,12 @@ class DOS
 		uint32_t getEnvironmentSize() const;
 
 		void setDTA( char *dta );
-		void setCurrentDirectory( char *path, host::Context &ctx );
+		void setCurrentDirectory( const char *path, host::Context &ctx );
 		void getCurrentDirectory( char *path, host::Context &ctx );
 		void fileOpen( char *path, host::Context &ctx );
-		void fileWrite( char *data, host::Context &ctx );
+		void fileClose( host::Context &ctx );
+		void fileRead( char *data, host::Context &ctx );
+		void fileWrite( const char *data, host::Context &ctx );
 		void fileSeek( host::Context &ctx );
 		void fileGetDeviceFlags( host::Context &ctx );
 
@@ -71,7 +73,7 @@ class DOS
 		void initPsp( int argc, char *argv[] );
 		void initEnvironment( char *envp[], const char *appName );
 		void convertDOSException( const DOSException &ex, host::Context &ctx );
-		uint8_t extractDrive( const std::string &pathName );
+		uint8_t extractDrive( const char *pathName, const char **pathSuffix );
 		File *getOpenFile( uint16_t handle );
 
 		static const uint8_t NUM_FILE_HANDLES = 20;

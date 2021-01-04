@@ -4,6 +4,7 @@
 
 #include <string>
 
+// TODO: use forward declarations
 #include "os/File.h"
 #include "os/MemMap.h"
 #include "os/Thread.h"

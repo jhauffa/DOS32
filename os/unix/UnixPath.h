@@ -16,6 +16,7 @@ class UnixPath : public Path
 		virtual ~UnixPath() {}
 
 		virtual bool exists() const;
+		virtual std::string getPathName() const;
 
 	private:
 		std::string mHostPath;

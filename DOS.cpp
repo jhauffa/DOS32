@@ -167,18 +167,27 @@ bool DOS::handleInterrupt( uint8_t idx, host::Context &ctx, void *lowMemBase )
 			break;
 		case 0x3B:
 			TRACE( "set current directory\n" );
-			setCurrentDirectory( (char *) translateAddress( lowMemBase, ctx.getDS(),
+			setCurrentDirectory( (const char *) translateAddress( lowMemBase, ctx.getDS(),
 					ctx.getDX() ), ctx );
 			break;
 		case 0x3D:
 			TRACE( "open\n" );
-			fileOpen( (char *) translateAddress( lowMemBase, ctx.getDS(), ctx.getDS() ),
+			fileOpen( (char *) translateAddress( lowMemBase, ctx.getDS(), ctx.getDX() ),
+				ctx );
+			break;
+		case 0x3E:
+			TRACE( "close\n" );
+			fileClose( ctx );
+			break;
+		case 0x3F:
+			TRACE( "read\n" );
+			fileRead( (char *) translateAddress( lowMemBase, ctx.getDS(), ctx.getDX() ),
 				ctx );
 			break;
 		case 0x40:
 			TRACE( "write\n" );
-			fileWrite( (char *) translateAddress( lowMemBase, ctx.getDS(), ctx.getDS() ),
-				ctx );
+			fileWrite( (const char *) translateAddress( lowMemBase, ctx.getDS(),
+				ctx.getDX() ), ctx );
 			break;
 		case 0x42:
 			TRACE( "seek\n" );
@@ -236,10 +245,15 @@ void DOS::convertDOSException( const DOSException &ex, host::Context &ctx )
 	ctx.setAX( ex.getErrorCode() );
 }
 
-uint8_t DOS::extractDrive( const std::string &pathName )
+uint8_t DOS::extractDrive( const char *pathName, const char **pathSuffix )
 {
-	if ( ( pathName.length() > 1 ) && ( pathName[1] == ':' ) )
-		return (uint8_t) std::toupper( pathName[0] ) - 'A';
+	if ( ( strlen( pathName ) > 1 ) && ( pathName[1] == ':' ) )
+	{
+		*pathSuffix = pathName + 2;
+		return (uint8_t) toupper( pathName[0] ) - 'A';
+	}
+
+	*pathSuffix = pathName;
 	return mVolumeManager.getCurrentDrive();
 }
 
@@ -253,12 +267,13 @@ File *DOS::getOpenFile( uint16_t handle )
 	return f;
 }
 
-void DOS::setCurrentDirectory( char *path, host::Context &ctx )
+void DOS::setCurrentDirectory( const char *path, host::Context &ctx )
 {
-	TRACE( "path = %s\n", path );
 	try
 	{
-		mVolumeManager.getVolume( extractDrive( path ) ).setCurrentPath( path );
+		const char *pathSuffix;
+		uint8_t drive = extractDrive( path, &pathSuffix );
+		mVolumeManager.getVolume( drive ).setCurrentPath( pathSuffix );
 	}
 	catch ( const DOSException &ex )
 	{
@@ -277,7 +292,10 @@ void DOS::getCurrentDirectory( char *path, host::Context &ctx )
 			drive--;
 
 		const std::string &pathName = mVolumeManager.getVolume( drive ).getCurrentPath();
-		strcpy( path, pathName.c_str() );
+		const char *p = pathName.c_str();
+		if ( *p == '\\' )
+			p++;
+		strcpy( path, p );
 		ctx.setAX( 0x0100 );
 	}
 	catch ( const DOSException &ex )
@@ -288,10 +306,11 @@ void DOS::getCurrentDirectory( char *path, host::Context &ctx )
 
 void DOS::fileOpen( char *path, host::Context &ctx )
 {
-	TRACE( "path = %s\n", path );
 	try
 	{
-		File *f = mVolumeManager.getVolume( extractDrive( path ) ).createFile( path );
+		const char *pathSuffix;
+		uint8_t drive = extractDrive( path, &pathSuffix );
+		File *f = mVolumeManager.getVolume( drive ).createFile( pathSuffix );
 		uint16_t handle = mOpenFiles.size();
 		if ( handle >= NUM_FILE_HANDLES )
 			throw DOSException( DOSException::ERROR_OUT_OF_HANDLES );
@@ -304,7 +323,36 @@ void DOS::fileOpen( char *path, host::Context &ctx )
 	}
 }
 
-void DOS::fileWrite( char *data, host::Context &ctx )
+void DOS::fileClose( host::Context &ctx )
+{
+	try
+	{
+		uint16_t handle = ctx.getBX();
+		File *f = getOpenFile( handle );
+		mOpenFiles[handle] = NULL;	// TODO: reuse handle
+		delete f;
+	}
+	catch ( const DOSException &ex )
+	{
+		convertDOSException( ex, ctx );
+	}
+}
+
+void DOS::fileRead( char *data, host::Context &ctx )
+{
+	try
+	{
+		File *f = getOpenFile( ctx.getBX() );
+		// TODO: does DOS/4GW use ECX/EAX?
+		ctx.setAX( f->read( data, ctx.getCX() ) & 0xFFFF );
+	}
+	catch ( const DOSException &ex )
+	{
+		convertDOSException( ex, ctx );
+	}
+}
+
+void DOS::fileWrite( const char *data, host::Context &ctx )
 {
 	try
 	{

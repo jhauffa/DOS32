@@ -5,6 +5,10 @@
 #include "Volume.h"
 
 
+namespace host {
+class File;
+}
+
 class HostDirectoryMapper : public Volume
 {
 	public:
@@ -17,8 +21,23 @@ class HostDirectoryMapper : public Volume
 		virtual File *createFile( const std::string &fileName );
 
 	private:
-		const std::string &mBaseDirName;
+		const std::string mBaseDirName;
 		std::string mCurPathName;
+};
+
+class HostFile : public File
+{
+	public:
+		HostFile( const std::string &fileName );
+		virtual ~HostFile();
+
+		virtual size_t read( void *data, size_t size );
+		virtual size_t write( const void *data, size_t size );
+		virtual size_t seek( long offset, int mode );
+		virtual uint16_t getDeviceFlags() const;
+
+	private:
+		host::File *mFile;
 };
 
 
