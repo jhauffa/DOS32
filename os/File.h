@@ -2,7 +2,7 @@
 #ifndef __DOS32_OS_FILE_H__
 #define __DOS32_OS_FILE_H__
 
-#include <stdint.h>
+#include <cstdint>
 
 namespace host {
 

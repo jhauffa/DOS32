@@ -4,6 +4,7 @@
 #include <cerrno>
 
 #include "Debug.h"
+#include "os/File.h"
 #include "os/unix/UnixException.h"
 #include "os/unix/UnixMemMap.h"
 

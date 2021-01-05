@@ -4,18 +4,19 @@
 
 #include <string>
 
-// TODO: use forward declarations
-#include "os/File.h"
 #include "os/MemMap.h"
 #include "os/Thread.h"
-#include "os/Context.h"
-#include "os/ExceptionManager.h"
-#include "os/LDT.h"
-#include "os/DateTime.h"
-#include "os/Path.h"
 
 
 namespace host {
+
+class File;
+class Context;
+class ExceptionManager;
+class LDT;
+class Time;
+class Path;
+
 
 class OS
 {

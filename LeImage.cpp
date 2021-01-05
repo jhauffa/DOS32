@@ -1,5 +1,8 @@
 
 #include "os/OS.h"
+#include "os/OSException.h"
+#include "os/File.h"
+#include "os/MemMap.h"
 #include "ExecutionEnvironment.h"
 #include "DescriptorTable.h"
 #include "ImageLoaderException.h"

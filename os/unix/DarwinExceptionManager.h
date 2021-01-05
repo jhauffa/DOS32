@@ -2,9 +2,8 @@
 #ifndef __DOS32_OS_UNIX_DARWIN_EXCEPTION_MANAGER__
 #define __DOS32_OS_UNIX_DARWIN_EXCEPTION_MANAGER__
 
-#include <map>
-#include <csignal>
 #include <cstdint>
+#include <csignal>
 
 #include "os/ExceptionManager.h"
 

@@ -1,5 +1,6 @@
 
 #include "os/OS.h"
+#include "os/LDT.h"
 #include "Debug.h"
 #include "DescriptorTable.h"
 

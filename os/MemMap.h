@@ -2,10 +2,10 @@
 #ifndef __DOS32_OS_MEMMAP_H__
 #define __DOS32_OS_MEMMAP_H__
 
-#include "os/File.h"
-
 
 namespace host {
+
+class File;
 
 typedef unsigned long MemSize;
 

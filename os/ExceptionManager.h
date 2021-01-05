@@ -2,6 +2,7 @@
 #ifndef __DOS32_OS_EXCEPTION_MANAGER__
 #define __DOS32_OS_EXCEPTION_MANAGER__
 
+
 namespace host {
 
 class ExceptionInfo;

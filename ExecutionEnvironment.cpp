@@ -2,7 +2,10 @@
 #include <cstdlib>
 
 #include "os/OS.h"
+#include "os/Thread.h"
+#include "os/ExceptionManager.h"
 #include "os/ExceptionInfo.h"
+#include "os/Context.h"
 #include "Debug.h"
 #include "DOS.h"
 #include "DOSExtender.h"

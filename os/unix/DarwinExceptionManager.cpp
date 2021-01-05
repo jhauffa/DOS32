@@ -1,6 +1,7 @@
 
 #include "Debug.h"
 #include "os/OS.h"
+#include "os/Context.h"
 #include "os/unix/UnixMemMap.h"
 #include "os/unix/UnixException.h"
 #include "os/unix/DarwinExceptionInfo.h"

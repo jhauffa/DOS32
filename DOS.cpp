@@ -3,6 +3,8 @@
 #include <cctype>
 
 #include "os/OS.h"
+#include "os/DateTime.h"
+#include "os/Context.h"
 #include "Debug.h"
 #include "DOS.h"
 

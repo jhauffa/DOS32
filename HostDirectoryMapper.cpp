@@ -3,6 +3,8 @@
 
 #include "os/OS.h"
 #include "os/OSException.h"
+#include "os/Path.h"
+#include "os/File.h"
 #include "DOSException.h"
 #include "HostDirectoryMapper.h"
 

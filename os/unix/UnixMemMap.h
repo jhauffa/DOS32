@@ -5,11 +5,13 @@
 #include <list>
 #include <sys/types.h>
 
-#include "os/File.h"
 #include "os/MemMap.h"
 
 
 namespace host {
+
+class File;
+
 
 class UnixMemMap : public MemMap
 {

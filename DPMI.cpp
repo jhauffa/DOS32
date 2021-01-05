@@ -3,6 +3,8 @@
 
 #include "os/OS.h"
 #include "os/OSException.h"
+#include "os/Context.h"
+#include "os/MemMap.h"
 #include "Debug.h"
 #include "ExecutionEnvironment.h"
 #include "DPMI.h"
