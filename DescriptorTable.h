@@ -46,7 +46,7 @@ class DescriptorTable
 		Descriptor *getDesc( uint16_t sel );
 
 		void allocOSDesc( uint16_t sel );
-		void allocLDTDesc( uint32_t base, uint32_t limit, uint16_t &sel );
+		uint16_t allocLDTDesc( uint32_t base, uint32_t limit );
 
 		uint16_t getOSCodeSel() const;
 		uint16_t getOSDataSel() const;

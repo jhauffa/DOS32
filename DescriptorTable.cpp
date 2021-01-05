@@ -97,12 +97,16 @@ void DescriptorTable::allocOSDesc( uint16_t sel )
 		delete desc;
 }
 
-void DescriptorTable::allocLDTDesc( uint32_t base, uint32_t limit, uint16_t &sel )
+uint16_t DescriptorTable::allocLDTDesc( uint32_t base, uint32_t limit )
 {
 	Descriptor *desc = new Descriptor( mLDT, base, limit );
-	sel = desc->getSel();
+	uint16_t sel = desc->getSel();
 	if ( !setDesc( sel, desc ) )
+	{
 		delete desc;
+		return 0;
+	}
+	return sel;
 }
 
 bool DescriptorTable::setDesc( uint16_t sel, Descriptor *desc )

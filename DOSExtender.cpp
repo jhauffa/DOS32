@@ -13,13 +13,11 @@ DOSExtender::DOSExtender( ExecutionEnvironment *env, DOS *dosServices ) :
 {
 	mEnv->registerInterruptHandler( 0x21, this );
 
-	uint16_t envSel;
 	DescriptorTable &descTable = mEnv->getDescriptorTable();
 	PSP *psp = mDOS->getPsp();
-	descTable.allocLDTDesc( (uint32_t) psp, 0x100, mPspSel );
-	descTable.allocLDTDesc( (uint32_t) mDOS->getEnvironment(), mDOS->getEnvironmentSize(),
-		envSel );
-	psp->environmentSegment = envSel;
+	mPspSel = descTable.allocLDTDesc( (uint32_t) psp, 0x100 );
+	psp->environmentSegment = descTable.allocLDTDesc( (uint32_t) mDOS->getEnvironment(),
+		mDOS->getEnvironmentSize() );
 }
 
 void DOSExtender::run( Image *img )

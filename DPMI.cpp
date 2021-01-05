@@ -61,18 +61,17 @@ bool DPMI::handleInterrupt( uint8_t idx, host::Context &ctx )
 			uint16_t sel = ctx.getBX();
 			TRACE( "get selector base, selector 0x%04x\n", sel );
 			Descriptor *desc = mEnv->getDescriptorTable().getDesc( sel );
-			if ( desc )
-			{
-				uint32_t base = desc->getBase();
-				ctx.setCX( ( base >> 16 ) & 0xFFFF );
-				ctx.setDX( base & 0xFFFF );
-			}
-			else
+			if ( !desc )
 			{
 				// invalid selector
 				ctx.setAX( ERR_INVALID_SELECTOR );
 				ctx.setCF( true );
+				break;
 			}
+
+			uint32_t base = desc->getBase();
+			ctx.setCX( ( base >> 16 ) & 0xFFFF );
+			ctx.setDX( base & 0xFFFF );
 			break;
 		}
 		case 0x0500:
@@ -100,7 +99,6 @@ bool DPMI::handleInterrupt( uint8_t idx, host::Context &ctx )
 		case 0x0501:
 		{
 			TRACE( "allocate memory block\n" );
-
 			uint32_t size = ( ctx.getBX() << 16 ) | ctx.getCX();
 			if ( size == 0 )
 			{
