@@ -35,7 +35,8 @@ bool DOSExtender::handleInterrupt( uint8_t idx, host::Context &ctx )
 {
 	/* Most DOS extenders hook INT 0x21 to override a number of functions, particularly
 	   memory management functions and functions that take memory addresses as parameters.
-	   All other function calls are reflected to the real mode interrupt handler. */
+	   Functions that majorly deviate from the original DOS implementation are handled
+	   here, everything else is implemented in class DOS. */
 	assert( idx == 0x21 );
 
 	bool canResume = true;
@@ -85,35 +86,7 @@ bool DOSExtender::handleInterrupt( uint8_t idx, host::Context &ctx )
 			canResume = handleDOS4GW( ctx );
 			break;
 
-		// all other functions are forwarded to DOS with address translation as required
-		case 0x1A:
-			TRACE( "set disk transfer address\n" );
-			mDOS->setDTA( (char *) ctx.getEDX() );
-			break;
-		case 0x3B:
-			TRACE( "set current directory\n" );
-			mDOS->setCurrentDirectory( (const char *) ctx.getEDX(), ctx );
-			break;
-		case 0x3D:
-			TRACE( "open\n" );
-			mDOS->fileOpen( (char *) ctx.getEDX(), ctx );
-			break;
-		case 0x3E:
-			TRACE( "close\n" );
-			mDOS->fileClose( ctx );
-			break;
-		case 0x3F:
-			TRACE( "read\n" );
-			mDOS->fileRead( (char *) ctx.getEDX(), ctx );
-			break;
-		case 0x40:
-			TRACE( "write\n" );
-			mDOS->fileWrite( (const char *) ctx.getEDX(), ctx );
-			break;
-		case 0x47:
-			TRACE( "get current directory\n" );
-			mDOS->getCurrentDirectory( (char *) ctx.getESI(), ctx );
-			break;
+		// all other functions are forwarded to DOS
 		default:
 			canResume = mDOS->handleInterrupt( idx, ctx, NULL );
 	}

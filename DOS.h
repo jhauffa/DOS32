@@ -51,14 +51,14 @@ class DOS
 		uint32_t getEnvironmentSize() const;
 
 		void setDTA( char *dta );
-		void setCurrentDirectory( const char *path, host::Context &ctx );
-		void getCurrentDirectory( char *path, host::Context &ctx );
-		void fileOpen( char *path, host::Context &ctx );
-		void fileClose( host::Context &ctx );
-		void fileRead( char *data, host::Context &ctx );
-		void fileWrite( const char *data, host::Context &ctx );
-		void fileSeek( host::Context &ctx );
-		void fileGetDeviceFlags( host::Context &ctx );
+		void setCurrentDirectory( const char *path );
+		void getCurrentDirectory( uint8_t drive, char *path );
+		uint16_t fileOpen( const char *path );
+		void fileClose( uint16_t handle );
+		uint32_t fileRead( uint16_t handle, uint32_t n, char *data );
+		uint32_t fileWrite( uint16_t handle, uint32_t n, const char *data );
+		uint64_t fileSeek( uint16_t handle, uint64_t pos, uint8_t mode );
+		uint16_t fileGetDeviceFlags( uint16_t handle );
 
 	private:
 		PSP *mPsp;
@@ -72,12 +72,9 @@ class DOS
 
 		void initPsp( int argc, char *argv[] );
 		void initEnvironment( char *envp[], const char *appName );
-		void convertDOSException( const DOSException &ex, host::Context &ctx );
 		uint8_t extractDrive( const char *pathName, const char **pathSuffix );
 
 		static const uint8_t NUM_FILE_HANDLES = 20;
-
-		static void *translateAddress( void *base, uint16_t segment, uint16_t offset );
 };
 
 

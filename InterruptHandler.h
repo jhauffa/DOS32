@@ -12,6 +12,7 @@ class Context;
 class InterruptHandler
 {
 	public:
+		// TODO: add a separate handler for interrupts raised in a 16-bit context
 		virtual bool handleInterrupt( uint8_t idx, host::Context &ctx ) = 0;
 };
 

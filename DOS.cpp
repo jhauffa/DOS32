@@ -98,12 +98,6 @@ void DOS::initEnvironment( char *envp[], const char *appName )
 	strcpy( &mEnvironment[unixEnvSize + 2], appName );
 }
 
-void *DOS::translateAddress( void *base, uint16_t segment, uint16_t offset )
-{
-	assert( base != NULL );
-	return ((char *) base) + ((segment << 4) + offset);
-}
-
 bool DOS::handleInterrupt( uint8_t idx, host::Context &ctx, void *lowMemBase )
 {
 	// called from DOSExtender::handleInterrupt
@@ -114,122 +108,134 @@ bool DOS::handleInterrupt( uint8_t idx, host::Context &ctx, void *lowMemBase )
 	uint8_t functionIdx = ctx.getAH();
 	ctx.setCF( false );
 
-	switch ( functionIdx )
+	try
 	{
-		case 0x0E:
-			TRACE( "set current drive\n" );
-			mVolumeManager.setCurrentDrive( ctx.getDL() );
-			ctx.setAL( mVolumeManager.getMaxDrive() );
-			break;
-		case 0x19:
-			TRACE( "get current drive\n" );
-			ctx.setAL( mVolumeManager.getCurrentDrive() );
-			break;
-		case 0x1A:
-			TRACE( "set disk transfer address\n" );
-			setDTA( (char *) translateAddress( lowMemBase, ctx.getDS(), ctx.getDX() ) );
-			break;
-		case 0x2C:
-			TRACE( "get system time\n" );
-			mTime->update();
-			ctx.setCH( mTime->getHours() );
-			ctx.setCL( mTime->getMinutes() );
-			ctx.setDH( mTime->getSeconds() );
-			ctx.setDL( mTime->getMilliSeconds() / 10 );
-			break;
-		case 0x2D:
+		switch ( functionIdx )
 		{
-			TRACE( "set system time\n" );
-			uint8_t hours = ctx.getCH();
-			uint8_t minutes = ctx.getCL();
-			uint8_t seconds = ctx.getDH();
-			uint8_t centiSeconds = ctx.getDL();
-			if ( ( hours < 24 ) && ( minutes < 60 ) && ( seconds < 60 ) &&
-			     ( centiSeconds < 100 ) )
-			{
+			case 0x0E:
+				TRACE( "set current drive\n" );
+				mVolumeManager.setCurrentDrive( ctx.getDL() );
+				ctx.setAL( mVolumeManager.getMaxDrive() );
+				break;
+			case 0x19:
+				TRACE( "get current drive\n" );
+				ctx.setAL( mVolumeManager.getCurrentDrive() );
+				break;
+			case 0x1A:
+				TRACE( "set disk transfer address\n" );
+				setDTA( (char *) ctx.getEDX() );
+				break;
+			case 0x2C:
+				TRACE( "get system time\n" );
 				mTime->update();
-				mTime->setBase( hours, minutes, seconds, centiSeconds * 10 );
-				ctx.setAL( 0 );
+				ctx.setCH( mTime->getHours() );
+				ctx.setCL( mTime->getMinutes() );
+				ctx.setDH( mTime->getSeconds() );
+				ctx.setDL( mTime->getMilliSeconds() / 10 );
+				break;
+			case 0x2D:
+			{
+				TRACE( "set system time\n" );
+				uint8_t hours = ctx.getCH();
+				uint8_t minutes = ctx.getCL();
+				uint8_t seconds = ctx.getDH();
+				uint8_t centiSeconds = ctx.getDL();
+				if ( ( hours < 24 ) && ( minutes < 60 ) && ( seconds < 60 ) &&
+					 ( centiSeconds < 100 ) )
+				{
+					mTime->update();
+					mTime->setBase( hours, minutes, seconds, centiSeconds * 10 );
+					ctx.setAL( 0 );
+				}
+				else
+					ctx.setAL( 0xFF );
+				break;
 			}
-			else
-				ctx.setAL( 0xFF );
-			break;
-		}
-		case 0x30:
-			TRACE( "get version\n" );
-			if ( ctx.getAL() == 0x01 )
-				ctx.setBH( 0 );
-			else
-				ctx.setBH( 0xFF );
-			ctx.setAX( 0x0005 );  // DOS 5.0
+			case 0x30:
+				TRACE( "get version\n" );
+				if ( ctx.getAL() == 0x01 )
+					ctx.setBH( 0 );
+				else
+					ctx.setBH( 0xFF );
+				ctx.setAX( 0x0005 );  // DOS 5.0
 
-			// 24-bit serial number
-			ctx.setBL( 0x12 );
-			ctx.setCX( 0x3457 );
-			break;
-		case 0x3B:
-			TRACE( "set current directory\n" );
-			setCurrentDirectory( (const char *) translateAddress( lowMemBase, ctx.getDS(),
-					ctx.getDX() ), ctx );
-			break;
-		case 0x3D:
-			TRACE( "open\n" );
-			fileOpen( (char *) translateAddress( lowMemBase, ctx.getDS(), ctx.getDX() ),
-				ctx );
-			break;
-		case 0x3E:
-			TRACE( "close\n" );
-			fileClose( ctx );
-			break;
-		case 0x3F:
-			TRACE( "read\n" );
-			fileRead( (char *) translateAddress( lowMemBase, ctx.getDS(), ctx.getDX() ),
-				ctx );
-			break;
-		case 0x40:
-			TRACE( "write\n" );
-			fileWrite( (const char *) translateAddress( lowMemBase, ctx.getDS(),
-				ctx.getDX() ), ctx );
-			break;
-		case 0x42:
-			TRACE( "seek\n" );
-			fileSeek( ctx );
-			break;
-		case 0x44:
-			TRACE( "IOCTL\n" );
-			if ( ctx.getAL() != 0 )
+				// 24-bit serial number
+				ctx.setBL( 0x12 );
+				ctx.setCX( 0x3457 );
+				break;
+			case 0x3B:
+				TRACE( "set current directory\n" );
+				setCurrentDirectory( (const char *) ctx.getEDX() );
+				break;
+			case 0x3D:
+				TRACE( "open\n" );
+				ctx.setEAX( fileOpen( (const char *) ctx.getEDX() ) );
+				break;
+			case 0x3E:
+				TRACE( "close\n" );
+				fileClose( ctx.getBX() );
+				break;
+			case 0x3F:
+				TRACE( "read\n" );
+				ctx.setEAX( fileRead( ctx.getBX(), ctx.getECX(),
+					(char *) ctx.getEDX() ) );
+				break;
+			case 0x40:
+				TRACE( "write\n" );
+				ctx.setEAX( fileWrite( ctx.getBX(), ctx.getECX(),
+					(const char *) ctx.getEDX() ) );
+				break;
+			case 0x42:
 			{
-				FIXME( "sub-function 0x%02x not implemented\n", ctx.getAL() );
-				canResume = false;
+				TRACE( "seek\n" );
+				uint64_t newPos = fileSeek( ctx.getBX(),
+					( ( (uint64_t) ctx.getECX() << 32 ) & 0xFFFFFFFF00000000) |
+						ctx.getEDX(), ctx.getAL() );
+				ctx.setEDX( ( newPos >> 32 ) & 0xFFFFFFFF );
+				ctx.setEAX( newPos & 0xFFFFFFFF );
 				break;
 			}
-			fileGetDeviceFlags( ctx );
-			break;
-		case 0x47:
-			TRACE( "get current directory\n" );
-			getCurrentDirectory( (char *) translateAddress( lowMemBase, ctx.getDS(),
-					ctx.getSI() ), ctx );
-			break;
-		case 0x4C:
-			TRACE( "exit, return code = %u\n", ctx.getAL() );
-			host::OS::exitThread( ctx.getAL() );
-			break;
-		case 0x59:
-			TRACE( "get extended error information\n" );
-			if ( ctx.getBX() != 0 )
-			{
-				FIXME( "sub-function 0x%04x not implemented\n", ctx.getBX() );
-				canResume = false;
+			case 0x44:
+				TRACE( "IOCTL\n" );
+				if ( ctx.getAL() != 0 )
+				{
+					FIXME( "sub-function 0x%02x not implemented\n", ctx.getAL() );
+					canResume = false;
+					break;
+				}
+				ctx.setDX( fileGetDeviceFlags( ctx.getBX() ) );
 				break;
-			}
-			ctx.setAX( mLastError.getErrorCode() );
-			ctx.setBH( mLastError.getErrorClass() );
-			ctx.setBL( mLastError.getRecommendedAction() );
-			ctx.setCH( mLastError.getErrorLocus() );
-			break;
-		default:
-			FIXME( "not implemented\n" );
-			canResume = false;
+			case 0x47:
+				TRACE( "get current directory\n" );
+				getCurrentDirectory( ctx.getDL(), (char *) ctx.getESI() );
+				break;
+			case 0x4C:
+				TRACE( "exit, return code = %u\n", ctx.getAL() );
+				host::OS::exitThread( ctx.getAL() );
+				break;
+			case 0x59:
+				TRACE( "get extended error information\n" );
+				if ( ctx.getBX() != 0 )
+				{
+					FIXME( "sub-function 0x%04x not implemented\n", ctx.getBX() );
+					canResume = false;
+					break;
+				}
+				ctx.setAX( mLastError.getErrorCode() );
+				ctx.setBH( mLastError.getErrorClass() );
+				ctx.setBL( mLastError.getRecommendedAction() );
+				ctx.setCH( mLastError.getErrorLocus() );
+				break;
+			default:
+				FIXME( "not implemented\n" );
+				canResume = false;
+		}
+	}
+	catch ( const DOSException &ex )
+	{
+		mLastError = ex;
+		ctx.setCF( true );
+		ctx.setEAX( ex.getErrorCode() );
 	}
 
 	return canResume;
@@ -238,13 +244,6 @@ bool DOS::handleInterrupt( uint8_t idx, host::Context &ctx, void *lowMemBase )
 void DOS::setDTA( char *dta )
 {
 	mDta = dta;
-}
-
-void DOS::convertDOSException( const DOSException &ex, host::Context &ctx )
-{
-	mLastError = ex;
-	ctx.setCF( true );
-	ctx.setAX( ex.getErrorCode() );
 }
 
 uint8_t DOS::extractDrive( const char *pathName, const char **pathSuffix )
@@ -259,124 +258,60 @@ uint8_t DOS::extractDrive( const char *pathName, const char **pathSuffix )
 	return mVolumeManager.getCurrentDrive();
 }
 
-void DOS::setCurrentDirectory( const char *path, host::Context &ctx )
+void DOS::setCurrentDirectory( const char *path )
 {
-	try
-	{
-		const char *pathSuffix;
-		uint8_t drive = extractDrive( path, &pathSuffix );
-		mVolumeManager.getVolume( drive ).setCurrentPath( pathSuffix );
-	}
-	catch ( const DOSException &ex )
-	{
-		convertDOSException( ex, ctx );
-	}
+	const char *pathSuffix;
+	uint8_t drive = extractDrive( path, &pathSuffix );
+	mVolumeManager.getVolume( drive ).setCurrentPath( pathSuffix );
 }
 
-void DOS::getCurrentDirectory( char *path, host::Context &ctx )
+void DOS::getCurrentDirectory( uint8_t drive, char *path )
 {
-	try
-	{
-		uint8_t drive = ctx.getDL();
-		if ( drive == 0 )
-			drive = mVolumeManager.getCurrentDrive();
-		else
-			drive--;
+	if ( drive == 0 )
+		drive = mVolumeManager.getCurrentDrive();
+	else
+		drive--;
 
-		const std::string &pathName = mVolumeManager.getVolume( drive ).getCurrentPath();
-		const char *p = pathName.c_str();
-		if ( *p == '\\' )
-			p++;
-		strcpy( path, p );
-		ctx.setAX( 0x0100 );
-	}
-	catch ( const DOSException &ex )
-	{
-		convertDOSException( ex, ctx );
-	}
+	const std::string &pathName = mVolumeManager.getVolume( drive ).getCurrentPath();
+	const char *p = pathName.c_str();
+	if ( *p == '\\' )
+		p++;
+	strcpy( path, p );
 }
 
-void DOS::fileOpen( char *path, host::Context &ctx )
+uint16_t DOS::fileOpen( const char *path )
 {
-	try
-	{
-		const char *pathSuffix;
-		uint8_t drive = extractDrive( path, &pathSuffix );
-		File *f = mVolumeManager.getVolume( drive ).createFile( pathSuffix );
-		ctx.setAX( mOpenFiles.allocate( f ) );
-	}
-	catch ( const DOSException &ex )
-	{
-		convertDOSException( ex, ctx );
-	}
+	const char *pathSuffix;
+	uint8_t drive = extractDrive( path, &pathSuffix );
+	File *f = mVolumeManager.getVolume( drive ).createFile( pathSuffix );
+	return mOpenFiles.allocate( f );
 }
 
-void DOS::fileClose( host::Context &ctx )
+void DOS::fileClose( uint16_t handle )
 {
-	try
-	{
-		uint16_t handle = ctx.getBX();
-		delete mOpenFiles.release( handle );
-	}
-	catch ( const DOSException &ex )
-	{
-		convertDOSException( ex, ctx );
-	}
+	delete mOpenFiles.release( handle );
 }
 
-void DOS::fileRead( char *data, host::Context &ctx )
+uint32_t DOS::fileRead( uint16_t handle, uint32_t n, char *data )
 {
-	try
-	{
-		File *f = mOpenFiles.get( ctx.getBX() );
-		// TODO: does DOS/4GW use ECX/EAX?
-		ctx.setAX( f->read( data, ctx.getCX() ) & 0xFFFF );
-	}
-	catch ( const DOSException &ex )
-	{
-		convertDOSException( ex, ctx );
-	}
+	File *f = mOpenFiles.get( handle );
+	return f->read( data, n );
 }
 
-void DOS::fileWrite( const char *data, host::Context &ctx )
+uint32_t DOS::fileWrite( uint16_t handle, uint32_t n, const char *data )
 {
-	try
-	{
-		File *f = mOpenFiles.get( ctx.getBX() );
-		// TODO: does DOS/4GW use ECX/EAX?
-		ctx.setAX( f->write( data, ctx.getCX() ) & 0xFFFF );
-	}
-	catch ( const DOSException &ex )
-	{
-		convertDOSException( ex, ctx );
-	}
+	File *f = mOpenFiles.get( handle );
+	return f->write( data, n );
 }
 
-void DOS::fileSeek( host::Context &ctx )
+uint64_t DOS::fileSeek( uint16_t handle, uint64_t pos, uint8_t mode )
 {
-	try
-	{
-		File *f = mOpenFiles.get( ctx.getBX() );
-		size_t newPos = f->seek( ( ctx.getCX() << 16 ) | ctx.getDX(),
-			(File::SeekMode) ctx.getAL() );
-		ctx.setDX( ( newPos >> 16 ) & 0xFFFF );
-		ctx.setAX( newPos & 0xFFFF );
-	}
-	catch ( const DOSException &ex )
-	{
-		convertDOSException( ex, ctx );
-	}
+	File *f = mOpenFiles.get( handle );
+	return f->seek( pos, (File::SeekMode) mode );
 }
 
-void DOS::fileGetDeviceFlags( host::Context &ctx )
+uint16_t DOS::fileGetDeviceFlags( uint16_t handle )
 {
-	try
-	{
-		File *f = mOpenFiles.get( ctx.getBX() );
-		ctx.setDX( f->getDeviceFlags() );
-	}
-	catch ( const DOSException &ex )
-	{
-		convertDOSException( ex, ctx );
-	}
+	File *f = mOpenFiles.get( handle );
+	return f->getDeviceFlags();
 }
