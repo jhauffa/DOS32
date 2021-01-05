@@ -8,17 +8,17 @@
 
 
 DOS::DOS( int argc, char *argv[], char *envp[] ) :
-	mLastError( DOSException::ERROR_NO_ERROR ), mVolumeManager()
+	mLastError( DOSException::ERROR_NO_ERROR ), mOpenFiles( NUM_FILE_HANDLES ),
+	mVolumeManager()
 {
 	mTime = host::OS::createTime();
 
 	// create standard file handles
-	mOpenFiles.reserve( NUM_FILE_HANDLES );
-	mOpenFiles.push_back( mVolumeManager.createConsole( stdin ) );
-	mOpenFiles.push_back( mVolumeManager.createConsole( stdout ) );
-	mOpenFiles.push_back( mVolumeManager.createConsole( stderr ) );
-	mOpenFiles.push_back( NULL );  // TODO: STDAUX
-	mOpenFiles.push_back( NULL );  // TODO: STDPRN
+	mOpenFiles.allocate( mVolumeManager.createConsole( stdin ) );
+	mOpenFiles.allocate( mVolumeManager.createConsole( stdout ) );
+	mOpenFiles.allocate( mVolumeManager.createConsole( stderr ) );
+	mOpenFiles.allocate( mVolumeManager.createConsole( stdout ) );  // TODO: STDAUX
+	mOpenFiles.allocate( mVolumeManager.createConsole( stdout ) );  // TODO: STDPRN
 
 	// TODO: convert/filter path names and env. variables (or load everything from cfg.)
 	initPsp( argc, argv );
@@ -257,16 +257,6 @@ uint8_t DOS::extractDrive( const char *pathName, const char **pathSuffix )
 	return mVolumeManager.getCurrentDrive();
 }
 
-File *DOS::getOpenFile( uint16_t handle )
-{
-	if ( handle >= mOpenFiles.size() )
-		throw DOSException( DOSException::ERROR_INVALID_HANDLE );
-	File *f = mOpenFiles[handle];
-	if ( !f )
-		throw DOSException( DOSException::ERROR_INVALID_HANDLE );
-	return f;
-}
-
 void DOS::setCurrentDirectory( const char *path, host::Context &ctx )
 {
 	try
@@ -311,11 +301,7 @@ void DOS::fileOpen( char *path, host::Context &ctx )
 		const char *pathSuffix;
 		uint8_t drive = extractDrive( path, &pathSuffix );
 		File *f = mVolumeManager.getVolume( drive ).createFile( pathSuffix );
-		uint16_t handle = mOpenFiles.size();
-		if ( handle >= NUM_FILE_HANDLES )
-			throw DOSException( DOSException::ERROR_OUT_OF_HANDLES );
-		mOpenFiles.push_back( f );
-		ctx.setAX( handle );
+		ctx.setAX( mOpenFiles.allocate( f ) );
 	}
 	catch ( const DOSException &ex )
 	{
@@ -328,9 +314,7 @@ void DOS::fileClose( host::Context &ctx )
 	try
 	{
 		uint16_t handle = ctx.getBX();
-		File *f = getOpenFile( handle );
-		mOpenFiles[handle] = NULL;	// TODO: reuse handle
-		delete f;
+		delete mOpenFiles.release( handle );
 	}
 	catch ( const DOSException &ex )
 	{
@@ -342,7 +326,7 @@ void DOS::fileRead( char *data, host::Context &ctx )
 {
 	try
 	{
-		File *f = getOpenFile( ctx.getBX() );
+		File *f = mOpenFiles.get( ctx.getBX() );
 		// TODO: does DOS/4GW use ECX/EAX?
 		ctx.setAX( f->read( data, ctx.getCX() ) & 0xFFFF );
 	}
@@ -356,7 +340,7 @@ void DOS::fileWrite( const char *data, host::Context &ctx )
 {
 	try
 	{
-		File *f = getOpenFile( ctx.getBX() );
+		File *f = mOpenFiles.get( ctx.getBX() );
 		// TODO: does DOS/4GW use ECX/EAX?
 		ctx.setAX( f->write( data, ctx.getCX() ) & 0xFFFF );
 	}
@@ -370,7 +354,7 @@ void DOS::fileSeek( host::Context &ctx )
 {
 	try
 	{
-		File *f = getOpenFile( ctx.getBX() );
+		File *f = mOpenFiles.get( ctx.getBX() );
 		size_t newPos = f->seek( ( ctx.getCX() << 16 ) | ctx.getDX(),
 			(File::SeekMode) ctx.getAL() );
 		ctx.setDX( ( newPos >> 16 ) & 0xFFFF );
@@ -386,7 +370,7 @@ void DOS::fileGetDeviceFlags( host::Context &ctx )
 {
 	try
 	{
-		File *f = getOpenFile( ctx.getBX() );
+		File *f = mOpenFiles.get( ctx.getBX() );
 		ctx.setDX( f->getDeviceFlags() );
 	}
 	catch ( const DOSException &ex )

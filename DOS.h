@@ -3,9 +3,9 @@
 #define __DOS32_DOS_H__
 
 #include <cstdint>
-#include <vector>
 
 #include "DOSException.h"
+#include "HandleTable.h"
 #include "Volume.h"
 
 
@@ -68,13 +68,12 @@ class DOS
 		char *mDta;
 		DOSException mLastError;
 		VolumeManager mVolumeManager;
-		std::vector<File *> mOpenFiles;
+		HandleTable<File> mOpenFiles;
 
 		void initPsp( int argc, char *argv[] );
 		void initEnvironment( char *envp[], const char *appName );
 		void convertDOSException( const DOSException &ex, host::Context &ctx );
 		uint8_t extractDrive( const char *pathName, const char **pathSuffix );
-		File *getOpenFile( uint16_t handle );
 
 		static const uint8_t NUM_FILE_HANDLES = 20;
 
