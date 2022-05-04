@@ -1,0 +1,13 @@
+- physical memory rework:
+  - lazily allocate all physical RAM at startup
+  - custom allocator that supports alignment, resizing, upper/lower split
+    -> implement corresponding DPMI functions
+  - programs assume that lower memory can be accessed via default flat selector - either
+    allocate virtual memory as close to zero as possible, or apply hidden offset to all
+    selectors
+  - translation from/to block-internal addresses (encourage inlining!)
+    -> needs to take selector / segment base into account!
+  - map executable image into that region
+
+- cleanup:
+  - avoid conversions between enums
